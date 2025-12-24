@@ -3,11 +3,11 @@ import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { to: "/app", icon: Home, label: "Home" },
-  { to: "/app/mosques", icon: MapPin, label: "Mosques" },
-  { to: "/app/notifications", icon: Bell, label: "Alerts" },
-  { to: "/app/donate", icon: Heart, label: "Donate" },
-  { to: "/app/profile", icon: User, label: "Profile" },
+  { to: "/mobile", icon: Home, label: "Home" },
+  { to: "/mobile/mosques", icon: MapPin, label: "Mosques" },
+  { to: "/mobile/notifications", icon: Bell, label: "Alerts" },
+  { to: "/mobile/donate", icon: Heart, label: "Donate" },
+  { to: "/mobile/profile", icon: User, label: "Profile" },
 ];
 
 export function MobileNavbar() {
@@ -18,7 +18,7 @@ export function MobileNavbar() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === "/app"}
+            end={item.to === "/mobile"}
             className={({ isActive }) =>
               cn(
                 "flex flex-col items-center gap-1 px-3 py-2 text-xs transition-colors",

@@ -14,7 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notification_history: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          auto_silent: boolean
+          created_at: string
+          detection_alerts: boolean
+          id: string
+          prayer_reminders: boolean
+          push_token: string | null
+          streak_reminders: boolean
+          updated_at: string
+          user_id: string
+          vibrate: boolean
+        }
+        Insert: {
+          auto_silent?: boolean
+          created_at?: string
+          detection_alerts?: boolean
+          id?: string
+          prayer_reminders?: boolean
+          push_token?: string | null
+          streak_reminders?: boolean
+          updated_at?: string
+          user_id: string
+          vibrate?: boolean
+        }
+        Update: {
+          auto_silent?: boolean
+          created_at?: string
+          detection_alerts?: boolean
+          id?: string
+          prayer_reminders?: boolean
+          push_token?: string | null
+          streak_reminders?: boolean
+          updated_at?: string
+          user_id?: string
+          vibrate?: boolean
+        }
+        Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_visit_date: string | null
+          longest_streak: number
+          updated_at: string
+          user_id: string
+          weekly_goal: number
+          weekly_visits: number
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_visit_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id: string
+          weekly_goal?: number
+          weekly_visits?: number
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_visit_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id?: string
+          weekly_goal?: number
+          weekly_visits?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
