@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Settings,
@@ -11,34 +12,32 @@ import {
   Shield,
   HelpCircle,
   Heart,
+  LogIn,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-const stats = [
-  { label: "Current Streak", value: "12", icon: Flame, color: "text-gold" },
-  { label: "Mosques Visited", value: "8", icon: MapPin, color: "text-emerald" },
-  { label: "Total Visits", value: "156", icon: Calendar, color: "text-primary" },
-];
+import { useAuth } from "@/hooks/use-auth";
+import { useUserStreaks } from "@/hooks/use-user-streaks";
+import { toast } from "sonner";
 
 const menuItems = [
   {
     label: "Notification Settings",
     icon: Bell,
-    route: "/app/notifications",
+    route: "/mobile/notifications",
   },
   {
     label: "Auto Silent Mode",
     icon: Moon,
-    route: "/app/notifications",
+    route: "/mobile/notifications",
   },
   {
     label: "Donation History",
     icon: Heart,
-    route: "/app/donate",
+    route: "/mobile/donate",
   },
   {
     label: "Privacy & Security",
@@ -63,6 +62,57 @@ const streakHistory = [
 ];
 
 export default function MobileProfile() {
+  const navigate = useNavigate();
+  const { user, signOut, loading: authLoading } = useAuth();
+  const { streak, loading: streakLoading } = useUserStreaks();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Signed out successfully');
+    navigate('/mobile/auth');
+  };
+
+  const stats = [
+    { label: "Current Streak", value: streak.current_streak.toString(), icon: Flame, color: "text-gold" },
+    { label: "Longest Streak", value: streak.longest_streak.toString(), icon: MapPin, color: "text-emerald" },
+    { label: "Weekly Visits", value: streak.weekly_visits.toString(), icon: Calendar, color: "text-primary" },
+  ];
+
+  // Guest mode
+  if (!user) {
+    return (
+      <div className="space-y-6">
+        {/* Guest Header */}
+        <Card className="border-none bg-gradient-to-br from-emerald/20 to-emerald/5">
+          <CardContent className="p-6 text-center">
+            <Avatar className="mx-auto h-20 w-20 border-4 border-emerald/20">
+              <AvatarFallback className="bg-muted text-xl">
+                <User className="h-8 w-8 text-muted-foreground" />
+              </AvatarFallback>
+            </Avatar>
+            <h2 className="mt-4 font-serif text-xl font-bold">Guest User</h2>
+            <p className="text-sm text-muted-foreground">
+              Sign in to sync your data across devices
+            </p>
+            <Button 
+              variant="islamic" 
+              className="mt-4"
+              onClick={() => navigate('/mobile/auth')}
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign In or Create Account
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* App Version */}
+        <p className="text-center text-xs text-muted-foreground">
+          Silent Masjid v1.0.0
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Profile Header */}
@@ -72,17 +122,19 @@ export default function MobileProfile() {
             <Avatar className="h-20 w-20 border-4 border-emerald/20">
               <AvatarImage src="/placeholder.svg" />
               <AvatarFallback className="bg-emerald text-xl text-white">
-                AM
+                {user.email?.charAt(0).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="font-serif text-xl font-bold">Ahmed Muhammad</h2>
+              <h2 className="font-serif text-xl font-bold">
+                {user.email?.split('@')[0] || 'User'}
+              </h2>
               <p className="text-sm text-muted-foreground">
-                ahmed@example.com
+                {user.email}
               </p>
               <Badge variant="gold" className="mt-2">
                 <Flame className="mr-1 h-3 w-3" />
-                12 Day Streak
+                {streak.current_streak} Day Streak
               </Badge>
             </div>
             <Button variant="ghost" size="icon">
@@ -110,7 +162,7 @@ export default function MobileProfile() {
         <CardContent className="p-4">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-serif text-lg font-semibold">This Week</h3>
-            <Badge variant="secondary">5/7 days</Badge>
+            <Badge variant="secondary">{streak.weekly_visits}/{streak.weekly_goal} visits</Badge>
           </div>
           <div className="grid grid-cols-7 gap-2">
             {streakHistory.map((day) => (
@@ -140,7 +192,10 @@ export default function MobileProfile() {
         <CardContent className="p-0">
           {menuItems.map((item, index) => (
             <div key={item.label}>
-              <button className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50">
+              <button 
+                className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50"
+                onClick={() => navigate(item.route)}
+              >
                 <div className="flex items-center gap-3">
                   <item.icon className="h-5 w-5 text-muted-foreground" />
                   <span className="text-sm font-medium">{item.label}</span>
@@ -154,7 +209,11 @@ export default function MobileProfile() {
       </Card>
 
       {/* Logout */}
-      <Button variant="outline" className="w-full text-destructive">
+      <Button 
+        variant="outline" 
+        className="w-full text-destructive"
+        onClick={handleSignOut}
+      >
         <LogOut className="mr-2 h-4 w-4" />
         Sign Out
       </Button>
