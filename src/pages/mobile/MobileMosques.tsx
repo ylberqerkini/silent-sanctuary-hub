@@ -1,65 +1,115 @@
-import { useState } from "react";
-import { MapPin, Search, Navigation, Star, Clock, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MapPin, Search, Navigation, Star, Clock, Plus, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-const mosques = [
-  {
-    id: 1,
-    name: "Masjid Al-Noor",
-    address: "123 Islamic Way, City",
-    distance: "0.3 mi",
-    rating: 4.8,
-    visits: 24,
-    favorite: true,
-    nextPrayer: "Dhuhr at 12:30 PM",
-  },
-  {
-    id: 2,
-    name: "Islamic Center Downtown",
-    address: "456 Main Street, City",
-    distance: "1.2 mi",
-    rating: 4.5,
-    visits: 12,
-    favorite: true,
-    nextPrayer: "Dhuhr at 12:25 PM",
-  },
-  {
-    id: 3,
-    name: "Masjid Al-Huda",
-    address: "789 Peace Road, City",
-    distance: "2.5 mi",
-    rating: 4.9,
-    visits: 5,
-    favorite: false,
-    nextPrayer: "Dhuhr at 12:35 PM",
-  },
-  {
-    id: 4,
-    name: "Community Mosque",
-    address: "321 Unity Lane, City",
-    distance: "3.1 mi",
-    rating: 4.6,
-    visits: 8,
-    favorite: false,
-    nextPrayer: "Dhuhr at 12:28 PM",
-  },
-];
+import { useGeofencing, Mosque } from "@/hooks/use-geofencing";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function MobileMosques() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const { user } = useAuth();
+  const { 
+    allMosques, 
+    nearbyMosques: geofenceNearby, 
+    currentPosition, 
+    calculateDistance,
+    startTracking,
+    isTracking 
+  } = useGeofencing();
 
-  const filteredMosques = mosques.filter((mosque) =>
-    mosque.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch user favorites
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchFavorites = async () => {
+      const { data } = await supabase
+        .from('user_favorite_mosques')
+        .select('mosque_id')
+        .eq('user_id', user.id);
+      
+      if (data) {
+        setFavorites(data.map(f => f.mosque_id));
+      }
+    };
+
+    fetchFavorites();
+  }, [user]);
+
+  // Start tracking if not already
+  useEffect(() => {
+    if (!isTracking) {
+      startTracking();
+    }
+  }, [isTracking, startTracking]);
+
+  // Toggle favorite
+  const toggleFavorite = async (mosqueId: string) => {
+    if (!user) {
+      toast.error('Please sign in to save favorites');
+      return;
+    }
+
+    const isFavorite = favorites.includes(mosqueId);
+
+    if (isFavorite) {
+      const { error } = await supabase
+        .from('user_favorite_mosques')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('mosque_id', mosqueId);
+
+      if (!error) {
+        setFavorites(prev => prev.filter(id => id !== mosqueId));
+        toast.success('Removed from favorites');
+      }
+    } else {
+      const { error } = await supabase
+        .from('user_favorite_mosques')
+        .insert({ user_id: user.id, mosque_id: mosqueId });
+
+      if (!error) {
+        setFavorites(prev => [...prev, mosqueId]);
+        toast.success('Added to favorites');
+      }
+    }
+  };
+
+  // Calculate distances and sort mosques
+  const mosquesWithDistance = allMosques.map(mosque => {
+    let distance = 'N/A';
+    let distanceMeters = Infinity;
+    
+    if (currentPosition) {
+      distanceMeters = calculateDistance(
+        currentPosition.coords.latitude,
+        currentPosition.coords.longitude,
+        Number(mosque.latitude),
+        Number(mosque.longitude)
+      );
+      const distanceInMiles = (distanceMeters / 1609.34).toFixed(1);
+      distance = `${distanceInMiles} mi`;
+    }
+    
+    return { 
+      ...mosque, 
+      distance, 
+      distanceMeters,
+      isFavorite: favorites.includes(mosque.id) 
+    };
+  }).sort((a, b) => a.distanceMeters - b.distanceMeters);
+
+  const filteredMosques = mosquesWithDistance.filter((mosque) =>
+    mosque.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    mosque.city?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const favoriteMosques = filteredMosques.filter((m) => m.favorite);
-  const nearbyMosques = [...filteredMosques].sort((a, b) =>
-    parseFloat(a.distance) - parseFloat(b.distance)
-  );
+  const favoriteMosques = filteredMosques.filter((m) => m.isFavorite);
 
   return (
     <div className="space-y-6">
@@ -88,19 +138,38 @@ export default function MobileMosques() {
       <Tabs defaultValue="nearby" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="nearby">Nearby</TabsTrigger>
-          <TabsTrigger value="favorites">Favorites</TabsTrigger>
+          <TabsTrigger value="favorites">Favorites ({favoriteMosques.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="nearby" className="mt-4 space-y-3">
-          {nearbyMosques.map((mosque) => (
-            <MosqueCard key={mosque.id} mosque={mosque} />
-          ))}
+          {filteredMosques.length > 0 ? (
+            filteredMosques.map((mosque) => (
+              <MosqueCard 
+                key={mosque.id} 
+                mosque={mosque} 
+                onToggleFavorite={() => toggleFavorite(mosque.id)}
+              />
+            ))
+          ) : (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                <MapPin className="mb-2 h-8 w-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  No mosques found
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="favorites" className="mt-4 space-y-3">
           {favoriteMosques.length > 0 ? (
             favoriteMosques.map((mosque) => (
-              <MosqueCard key={mosque.id} mosque={mosque} />
+              <MosqueCard 
+                key={mosque.id} 
+                mosque={mosque} 
+                onToggleFavorite={() => toggleFavorite(mosque.id)}
+              />
             ))
           ) : (
             <Card>
@@ -108,6 +177,9 @@ export default function MobileMosques() {
                 <Star className="mb-2 h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
                   No favorite mosques yet
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Tap the heart icon to add favorites
                 </p>
               </CardContent>
             </Card>
@@ -125,10 +197,17 @@ export default function MobileMosques() {
 }
 
 interface MosqueCardProps {
-  mosque: typeof mosques[0];
+  mosque: Mosque & { distance: string; distanceMeters: number; isFavorite: boolean };
+  onToggleFavorite: () => void;
 }
 
-function MosqueCard({ mosque }: MosqueCardProps) {
+function MosqueCard({ mosque, onToggleFavorite }: MosqueCardProps) {
+  const handleNavigate = () => {
+    // Open in maps app
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${mosque.latitude},${mosque.longitude}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-4">
@@ -140,35 +219,46 @@ function MosqueCard({ mosque }: MosqueCardProps) {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-medium">{mosque.name}</h3>
-                {mosque.favorite && (
-                  <Star className="h-4 w-4 fill-gold text-gold" />
+                {mosque.is_verified && (
+                  <Badge variant="approved" className="text-[10px]">Verified</Badge>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">{mosque.address}</p>
+              <p className="text-xs text-muted-foreground">
+                {mosque.address || mosque.city || 'Address not available'}
+              </p>
               <div className="mt-2 flex items-center gap-3 text-xs">
                 <span className="flex items-center gap-1 text-emerald">
                   <Navigation className="h-3 w-3" />
                   {mosque.distance}
                 </span>
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {mosque.nextPrayer}
-                </span>
+                {mosque.city && (
+                  <span className="text-muted-foreground">
+                    {mosque.city}
+                  </span>
+                )}
               </div>
             </div>
           </div>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={onToggleFavorite}
+            className="h-8 w-8"
+          >
+            <Heart 
+              className={`h-5 w-5 ${mosque.isFavorite ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} 
+            />
+          </Button>
         </div>
 
         <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
-              {mosque.visits} visits
-            </Badge>
-            <Badge variant="gold" className="text-xs">
-              ⭐ {mosque.rating}
+              {mosque.geofence_radius}m radius
             </Badge>
           </div>
-          <Button variant="islamic" size="sm">
+          <Button variant="islamic" size="sm" onClick={handleNavigate}>
+            <Navigation className="mr-1 h-3 w-3" />
             Navigate
           </Button>
         </div>

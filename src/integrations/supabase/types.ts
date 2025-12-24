@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      mosque_visits: {
+        Row: {
+          duration_minutes: number | null
+          entered_at: string
+          exited_at: string | null
+          id: string
+          mosque_id: string
+          user_id: string
+        }
+        Insert: {
+          duration_minutes?: number | null
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          mosque_id: string
+          user_id: string
+        }
+        Update: {
+          duration_minutes?: number | null
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          mosque_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mosque_visits_mosque_id_fkey"
+            columns: ["mosque_id"]
+            isOneToOne: false
+            referencedRelation: "mosques"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mosques: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          geofence_radius: number
+          id: string
+          is_verified: boolean
+          latitude: number
+          longitude: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          geofence_radius?: number
+          id?: string
+          is_verified?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          geofence_radius?: number
+          id?: string
+          is_verified?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_history: {
         Row: {
           created_at: string
@@ -70,6 +147,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_favorite_mosques: {
+        Row: {
+          created_at: string
+          id: string
+          mosque_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mosque_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mosque_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorite_mosques_mosque_id_fkey"
+            columns: ["mosque_id"]
+            isOneToOne: false
+            referencedRelation: "mosques"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_preferences: {
         Row: {
