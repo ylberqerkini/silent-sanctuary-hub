@@ -1,10 +1,12 @@
-import { Bell, Volume2, VolumeX, Smartphone, Clock, Check } from "lucide-react";
+import { Bell, Volume2, VolumeX, Smartphone, Clock, Check, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
-
+import { PushNotificationSetup } from "@/components/mobile/PushNotificationSetup";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 const recentNotifications = [
   {
     id: 1,
@@ -30,6 +32,8 @@ const recentNotifications = [
 ];
 
 export default function MobileNotifications() {
+  const { notifications: pushNotifications, clearNotifications, sendLocalMosqueAlert } = usePushNotifications();
+  
   const [settings, setSettings] = useState({
     autoSilent: true,
     detectionAlerts: true,
@@ -41,6 +45,18 @@ export default function MobileNotifications() {
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+  
+  // Combine mock notifications with real push notifications
+  const allNotifications = [
+    ...pushNotifications.map(n => ({
+      id: parseInt(n.id) || Date.now(),
+      title: n.title,
+      message: n.body,
+      time: getRelativeTime(n.receivedAt),
+      type: n.type,
+    })),
+    ...recentNotifications,
+  ];
 
   return (
     <div className="space-y-6">
@@ -53,6 +69,20 @@ export default function MobileNotifications() {
           Manage alerts and silent mode
         </p>
       </div>
+
+      {/* Push Notification Setup */}
+      <PushNotificationSetup />
+
+      {/* Test Notification Button (for demo) */}
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="w-full"
+        onClick={() => sendLocalMosqueAlert('Masjid Al-Noor')}
+      >
+        <Bell className="mr-2 h-4 w-4" />
+        Test Mosque Detection Alert
+      </Button>
 
       {/* Auto Silent Mode Card */}
       <Card className="border-emerald/30 bg-gradient-to-br from-emerald/10 to-emerald/5">
@@ -164,46 +194,79 @@ export default function MobileNotifications() {
       {/* Recent Notifications */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Recent</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Recent</CardTitle>
+            {allNotifications.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={clearNotifications}
+                className="h-8 px-2 text-muted-foreground"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {recentNotifications.map((notification) => (
-            <div
-              key={notification.id}
-              className="flex items-start gap-3 rounded-lg bg-muted/30 p-3"
-            >
-              <div
-                className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full ${
-                  notification.type === "detection"
-                    ? "bg-emerald/20"
-                    : notification.type === "streak"
-                    ? "bg-gold/20"
-                    : "bg-primary/20"
-                }`}
-              >
-                {notification.type === "detection" ? (
-                  <VolumeX className="h-4 w-4 text-emerald" />
-                ) : notification.type === "streak" ? (
-                  <span className="text-sm">🔥</span>
-                ) : (
-                  <Bell className="h-4 w-4 text-primary" />
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{notification.title}</p>
-                  <span className="text-xs text-muted-foreground">
-                    {notification.time}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {notification.message}
-                </p>
-              </div>
+          {allNotifications.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              No notifications yet
             </div>
-          ))}
+          ) : (
+            allNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className="flex items-start gap-3 rounded-lg bg-muted/30 p-3"
+              >
+                <div
+                  className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full ${
+                    notification.type === "detection"
+                      ? "bg-emerald/20"
+                      : notification.type === "streak"
+                      ? "bg-gold/20"
+                      : "bg-primary/20"
+                  }`}
+                >
+                  {notification.type === "detection" ? (
+                    <VolumeX className="h-4 w-4 text-emerald" />
+                  ) : notification.type === "streak" ? (
+                    <span className="text-sm">🔥</span>
+                  ) : (
+                    <Bell className="h-4 w-4 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{notification.title}</p>
+                    <span className="text-xs text-muted-foreground">
+                      {notification.time}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {notification.message}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
     </div>
   );
+}
+
+// Helper function
+function getRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  if (diffDays === 1) return 'Yesterday';
+  return `${diffDays} days ago`;
 }
