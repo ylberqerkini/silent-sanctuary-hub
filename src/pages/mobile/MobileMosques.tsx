@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { MapPin, Search, Navigation, Star, Clock, Plus, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MapPin, Search, Navigation, Star, Clock, Plus, Heart, Map } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,16 +112,28 @@ export default function MobileMosques() {
 
   const favoriteMosques = filteredMosques.filter((m) => m.isFavorite);
 
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="font-serif text-2xl font-bold text-foreground">
-          Mosques
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Find mosques near you
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-serif text-2xl font-bold text-foreground">
+            Mosques
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Find mosques near you
+          </p>
+        </div>
+        <Button 
+          variant="islamic" 
+          size="sm"
+          onClick={() => navigate('/mobile/map')}
+        >
+          <Map className="mr-1 h-4 w-4" />
+          Map
+        </Button>
       </div>
 
       {/* Search */}
