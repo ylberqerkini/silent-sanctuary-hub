@@ -1,22 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { MapPin, Bell, Flame, Moon, Sun, Clock } from "lucide-react";
+import { MapPin, Bell, Flame, Moon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { GeofenceStatus } from "@/components/mobile/GeofenceStatus";
+import { PrayerTimesCard } from "@/components/mobile/PrayerTimesCard";
 import { useUserStreaks } from "@/hooks/use-user-streaks";
 import { useGeofencing } from "@/hooks/use-geofencing";
-
-// Mock prayer times
-const prayerTimes = [
-  { name: "Fajr", time: "5:23 AM", passed: true },
-  { name: "Sunrise", time: "6:45 AM", passed: true },
-  { name: "Dhuhr", time: "12:30 PM", passed: false, next: true },
-  { name: "Asr", time: "3:45 PM", passed: false },
-  { name: "Maghrib", time: "6:15 PM", passed: false },
-  { name: "Isha", time: "7:45 PM", passed: false },
-];
 
 export default function MobileHome() {
   const navigate = useNavigate();
@@ -85,49 +76,12 @@ export default function MobileHome() {
       {/* Geofencing Detection Status */}
       <GeofenceStatus />
 
-      {/* Prayer Times */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-serif text-lg font-semibold">Prayer Times</h3>
-            <Badge variant="secondary" className="text-xs">
-              <Clock className="mr-1 h-3 w-3" />
-              Today
-            </Badge>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {prayerTimes.map((prayer) => (
-              <div
-                key={prayer.name}
-                className={`rounded-lg p-3 text-center transition-all ${
-                  prayer.next
-                    ? "bg-emerald/20 ring-2 ring-emerald/50"
-                    : prayer.passed
-                    ? "bg-muted/50 opacity-60"
-                    : "bg-muted/30"
-                }`}
-              >
-                <div className="flex items-center justify-center gap-1">
-                  {prayer.name === "Fajr" || prayer.name === "Isha" ? (
-                    <Moon className="h-3 w-3 text-muted-foreground" />
-                  ) : (
-                    <Sun className="h-3 w-3 text-muted-foreground" />
-                  )}
-                  <span className="text-xs font-medium">{prayer.name}</span>
-                </div>
-                <p className={`mt-1 text-sm ${prayer.next ? "font-bold text-emerald" : ""}`}>
-                  {prayer.time}
-                </p>
-                {prayer.next && (
-                  <Badge variant="approved" className="mt-1 text-[10px]">
-                    Next
-                  </Badge>
-                )}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Prayer Times - Real API Data */}
+      <PrayerTimesCard 
+        latitude={currentPosition?.coords.latitude} 
+        longitude={currentPosition?.coords.longitude}
+        compact
+      />
 
       {/* Nearby Mosques */}
       <Card>
