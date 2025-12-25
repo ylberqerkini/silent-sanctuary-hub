@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { MapPin, Bell, Flame, Moon } from "lucide-react";
+import { MapPin, Bell, Flame, Moon, Compass } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +75,26 @@ export default function MobileHome() {
 
       {/* Geofencing Detection Status */}
       <GeofenceStatus />
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 gap-3">
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex-col gap-2 border-emerald/30 hover:bg-emerald/10"
+          onClick={() => navigate('/mobile/qibla')}
+        >
+          <Compass className="h-6 w-6 text-emerald" />
+          <span className="text-sm font-medium">Qibla Finder</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex-col gap-2 border-gold/30 hover:bg-gold/10"
+          onClick={() => navigate('/mobile/donate')}
+        >
+          <span className="text-2xl">💝</span>
+          <span className="text-sm font-medium">Donate</span>
+        </Button>
+      </div>
 
       {/* Prayer Times - Real API Data */}
       <PrayerTimesCard 
