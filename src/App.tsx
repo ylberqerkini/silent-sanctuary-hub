@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import { MobileLayout } from "./components/mobile/MobileLayout";
 import MobileHome from "./pages/mobile/MobileHome";
 import MobileMosques from "./pages/mobile/MobileMosques";
+import MobileMapView from "./pages/mobile/MobileMapView";
 import MobileNotifications from "./pages/mobile/MobileNotifications";
 import MobileDonate from "./pages/mobile/MobileDonate";
 import MobileProfile from "./pages/mobile/MobileProfile";
@@ -48,6 +49,7 @@ const App = () => (
             {/* Mobile App Routes */}
             <Route path="/mobile" element={<MobileLayout><MobileHome /></MobileLayout>} />
             <Route path="/mobile/mosques" element={<MobileLayout><MobileMosques /></MobileLayout>} />
+            <Route path="/mobile/map" element={<MobileMapView />} />
             <Route path="/mobile/notifications" element={<MobileLayout><MobileNotifications /></MobileLayout>} />
             <Route path="/mobile/donate" element={<MobileLayout><MobileDonate /></MobileLayout>} />
             <Route path="/mobile/profile" element={<MobileLayout><MobileProfile /></MobileLayout>} />
