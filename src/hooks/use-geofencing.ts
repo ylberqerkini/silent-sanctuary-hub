@@ -6,7 +6,27 @@ import { useAuth } from './use-auth';
 import { usePushNotifications } from './use-push-notifications';
 import { useUserStreaks } from './use-user-streaks';
 import { useNotificationHistory } from './use-notification-history';
+import { useUserPreferences } from './use-user-preferences';
 import { toast } from 'sonner';
+
+// Try to trigger device vibration
+function triggerVibration(vibrate: boolean) {
+  if (!vibrate) return;
+  if ('vibrate' in navigator) {
+    navigator.vibrate([200, 100, 200]);
+  }
+}
+
+// Show silent mode UI indicator
+function showSilentModeIndicator(mosqueName: string, enabled: boolean) {
+  if (enabled) {
+    toast.success(`Silent Mode Activated`, {
+      description: `Entering ${mosqueName}. Please silence your phone.`,
+      icon: '🔇',
+      duration: 5000,
+    });
+  }
+}
 
 export interface Mosque {
   id: string;
@@ -55,6 +75,10 @@ export function useGeofencing() {
   const { sendLocalMosqueAlert } = usePushNotifications();
   const { recordVisit } = useUserStreaks();
   const { addNotification } = useNotificationHistory();
+  const { preferences } = useUserPreferences();
+  
+  // Track if auto-silent is currently active
+  const [isAutoSilentActive, setIsAutoSilentActive] = useState(false);
   
   const [state, setState] = useState<GeofenceState>({
     isTracking: false,
@@ -124,14 +148,29 @@ export function useGeofencing() {
   const handleEnterMosque = useCallback(async (mosque: Mosque) => {
     console.log('Entering mosque:', mosque.name);
     
-    // Send notification
-    sendLocalMosqueAlert(mosque.name);
+    // Handle auto-silent mode
+    if (preferences.auto_silent) {
+      setIsAutoSilentActive(true);
+      showSilentModeIndicator(mosque.name, true);
+      
+      // Trigger vibration if enabled
+      if (preferences.vibrate) {
+        triggerVibration(true);
+      }
+    }
+    
+    // Send notification if detection alerts are enabled
+    if (preferences.detection_alerts) {
+      sendLocalMosqueAlert(mosque.name);
+    }
     
     // Add to notification history
     if (user) {
       addNotification(
         `${mosque.name} Detected`,
-        'Your phone has been silenced. May your prayers be accepted.',
+        preferences.auto_silent 
+          ? 'Silent mode activated. May your prayers be accepted.'
+          : 'You have entered a mosque. Please silence your phone.',
         'detection'
       );
     }
@@ -156,16 +195,25 @@ export function useGeofencing() {
     recordVisit();
 
     lastInsideMosqueRef.current = mosque;
-  }, [user, sendLocalMosqueAlert, addNotification, recordVisit]);
+  }, [user, sendLocalMosqueAlert, addNotification, recordVisit, preferences.auto_silent, preferences.detection_alerts, preferences.vibrate]);
 
   // Handle exiting a mosque
   const handleExitMosque = useCallback(async (mosque: Mosque) => {
     console.log('Exiting mosque:', mosque.name);
     
-    toast.info(`Left ${mosque.name}`, {
-      description: 'Your phone settings have been restored.',
-      icon: '🕌',
-    });
+    // Deactivate auto-silent mode
+    if (isAutoSilentActive) {
+      setIsAutoSilentActive(false);
+      toast.info(`Left ${mosque.name}`, {
+        description: 'Silent mode deactivated. Normal mode restored.',
+        icon: '🔔',
+      });
+    } else {
+      toast.info(`Left ${mosque.name}`, {
+        description: 'Thank you for visiting.',
+        icon: '🕌',
+      });
+    }
 
     // Update visit with exit time
     if (user && currentVisitIdRef.current) {
@@ -185,7 +233,7 @@ export function useGeofencing() {
     }
 
     lastInsideMosqueRef.current = null;
-  }, [user]);
+  }, [user, isAutoSilentActive]);
 
   // Process position update
   const processPosition = useCallback((position: Position) => {
@@ -415,6 +463,7 @@ export function useGeofencing() {
   return {
     ...state,
     allMosques,
+    isAutoSilentActive,
     startTracking,
     stopTracking,
     getCurrentPosition,

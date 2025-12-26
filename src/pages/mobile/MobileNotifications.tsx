@@ -1,12 +1,14 @@
-import { Bell, Volume2, VolumeX, Smartphone, Clock, Check, Trash2 } from "lucide-react";
+import { Bell, Volume2, VolumeX, Smartphone, Clock, Check, Trash2, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { PushNotificationSetup } from "@/components/mobile/PushNotificationSetup";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
+import { useGeofencing } from "@/hooks/use-geofencing";
+
 const recentNotifications = [
   {
     id: 1,
@@ -33,18 +35,8 @@ const recentNotifications = [
 
 export default function MobileNotifications() {
   const { notifications: pushNotifications, clearNotifications, sendLocalMosqueAlert } = usePushNotifications();
-  
-  const [settings, setSettings] = useState({
-    autoSilent: true,
-    detectionAlerts: true,
-    streakReminders: true,
-    prayerReminders: false,
-    vibrate: true,
-  });
-
-  const toggleSetting = (key: keyof typeof settings) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const { preferences, togglePreference, loading: preferencesLoading } = useUserPreferences();
+  const { isAutoSilentActive, insideMosque, isTracking } = useGeofencing();
   
   // Combine mock notifications with real push notifications
   const allNotifications = [
@@ -85,12 +77,12 @@ export default function MobileNotifications() {
       </Button>
 
       {/* Auto Silent Mode Card */}
-      <Card className="border-emerald/30 bg-gradient-to-br from-emerald/10 to-emerald/5">
+      <Card className={`border-emerald/30 ${isAutoSilentActive ? 'bg-gradient-to-br from-emerald/20 to-emerald/10 ring-2 ring-emerald/50' : 'bg-gradient-to-br from-emerald/10 to-emerald/5'}`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald/20">
-                <VolumeX className="h-6 w-6 text-emerald" />
+              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${isAutoSilentActive ? 'bg-emerald animate-pulse' : 'bg-emerald/20'}`}>
+                <VolumeX className={`h-6 w-6 ${isAutoSilentActive ? 'text-white' : 'text-emerald'}`} />
               </div>
               <div>
                 <h3 className="font-medium">Auto Silent Mode</h3>
@@ -100,14 +92,29 @@ export default function MobileNotifications() {
               </div>
             </div>
             <Switch
-              checked={settings.autoSilent}
-              onCheckedChange={() => toggleSetting("autoSilent")}
+              checked={preferences.auto_silent}
+              onCheckedChange={() => togglePreference("auto_silent")}
+              disabled={preferencesLoading}
             />
           </div>
-          {settings.autoSilent && (
+          
+          {/* Active Status Indicator */}
+          {isAutoSilentActive && insideMosque && (
+            <div className="mt-3 flex items-center gap-2 rounded-lg bg-emerald p-3 text-sm text-white">
+              <MapPin className="h-4 w-4" />
+              <span className="font-medium">Currently at {insideMosque.name} - Silent Mode Active</span>
+            </div>
+          )}
+          
+          {preferences.auto_silent && !isAutoSilentActive && (
             <div className="mt-3 flex items-center gap-2 rounded-lg bg-emerald/10 p-2 text-xs text-emerald">
               <Check className="h-4 w-4" />
-              <span>Your phone will silence automatically in mosques</span>
+              <span>
+                {isTracking 
+                  ? 'Monitoring for nearby mosques...' 
+                  : 'Enable location tracking to detect mosques'
+                }
+              </span>
             </div>
           )}
         </CardContent>
@@ -130,8 +137,9 @@ export default function MobileNotifications() {
               </div>
             </div>
             <Switch
-              checked={settings.detectionAlerts}
-              onCheckedChange={() => toggleSetting("detectionAlerts")}
+              checked={preferences.detection_alerts}
+              onCheckedChange={() => togglePreference("detection_alerts")}
+              disabled={preferencesLoading}
             />
           </div>
 
@@ -148,8 +156,9 @@ export default function MobileNotifications() {
               </div>
             </div>
             <Switch
-              checked={settings.streakReminders}
-              onCheckedChange={() => toggleSetting("streakReminders")}
+              checked={preferences.streak_reminders}
+              onCheckedChange={() => togglePreference("streak_reminders")}
+              disabled={preferencesLoading}
             />
           </div>
 
@@ -166,8 +175,9 @@ export default function MobileNotifications() {
               </div>
             </div>
             <Switch
-              checked={settings.prayerReminders}
-              onCheckedChange={() => toggleSetting("prayerReminders")}
+              checked={preferences.prayer_reminders}
+              onCheckedChange={() => togglePreference("prayer_reminders")}
+              disabled={preferencesLoading}
             />
           </div>
 
@@ -184,8 +194,9 @@ export default function MobileNotifications() {
               </div>
             </div>
             <Switch
-              checked={settings.vibrate}
-              onCheckedChange={() => toggleSetting("vibrate")}
+              checked={preferences.vibrate}
+              onCheckedChange={() => togglePreference("vibrate")}
+              disabled={preferencesLoading}
             />
           </div>
         </CardContent>
