@@ -19,69 +19,57 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LanguageSelector } from "@/components/mobile/LanguageSelector";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserStreaks } from "@/hooks/use-user-streaks";
+import { useLanguage } from "@/hooks/use-language";
 import { toast } from "sonner";
-
-const menuItems = [
-  {
-    label: "Notification Settings",
-    icon: Bell,
-    route: "/mobile/notifications",
-  },
-  {
-    label: "Auto Silent Mode",
-    icon: Moon,
-    route: "/mobile/notifications",
-  },
-  {
-    label: "Donation History",
-    icon: Heart,
-    route: "/mobile/donate",
-  },
-  {
-    label: "Privacy & Security",
-    icon: Shield,
-    route: "#",
-  },
-  {
-    label: "Help & Support",
-    icon: HelpCircle,
-    route: "#",
-  },
-];
-
-const streakHistory = [
-  { day: "Mon", active: true },
-  { day: "Tue", active: true },
-  { day: "Wed", active: true },
-  { day: "Thu", active: false },
-  { day: "Fri", active: true },
-  { day: "Sat", active: true },
-  { day: "Sun", active: true },
-];
 
 export default function MobileProfile() {
   const navigate = useNavigate();
-  const { user, signOut, loading: authLoading } = useAuth();
-  const { streak, loading: streakLoading } = useUserStreaks();
+  const { user, signOut } = useAuth();
+  const { streak } = useUserStreaks();
+  const { t } = useLanguage();
+
+  const menuItems = [
+    { labelKey: "notificationSettings", icon: Bell, route: "/mobile/notifications" },
+    { labelKey: "autoSilentMode", icon: Moon, route: "/mobile/notifications" },
+    { labelKey: "donationHistory", icon: Heart, route: "/mobile/donate" },
+    { labelKey: "privacySecurity", icon: Shield, route: "#" },
+    { labelKey: "helpSupport", icon: HelpCircle, route: "#" },
+  ];
+
+  const streakHistory = [
+    { dayKey: "mon", active: true },
+    { dayKey: "tue", active: true },
+    { dayKey: "wed", active: true },
+    { dayKey: "thu", active: false },
+    { dayKey: "fri", active: true },
+    { dayKey: "sat", active: true },
+    { dayKey: "sun", active: true },
+  ];
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success('Signed out successfully');
+    toast.success(t('signedOutSuccess'));
     navigate('/mobile/auth');
   };
 
   const stats = [
-    { label: "Current Streak", value: streak.current_streak.toString(), icon: Flame, color: "text-gold" },
-    { label: "Longest Streak", value: streak.longest_streak.toString(), icon: MapPin, color: "text-emerald" },
-    { label: "Weekly Visits", value: streak.weekly_visits.toString(), icon: Calendar, color: "text-primary" },
+    { labelKey: "currentStreak", value: streak.current_streak.toString(), icon: Flame, color: "text-gold" },
+    { labelKey: "longestStreak", value: streak.longest_streak.toString(), icon: MapPin, color: "text-emerald" },
+    { labelKey: "weeklyVisits", value: streak.weekly_visits.toString(), icon: Calendar, color: "text-primary" },
   ];
 
   // Guest mode
   if (!user) {
     return (
       <div className="space-y-6">
+        {/* Language selector at top */}
+        <div className="flex justify-end">
+          <LanguageSelector />
+        </div>
+
         {/* Guest Header */}
         <Card className="border-none bg-gradient-to-br from-emerald/20 to-emerald/5">
           <CardContent className="p-6 text-center">
@@ -90,9 +78,9 @@ export default function MobileProfile() {
                 <User className="h-8 w-8 text-muted-foreground" />
               </AvatarFallback>
             </Avatar>
-            <h2 className="mt-4 font-serif text-xl font-bold">Guest User</h2>
+            <h2 className="mt-4 font-serif text-xl font-bold">{t('guestUser')}</h2>
             <p className="text-sm text-muted-foreground">
-              Sign in to sync your data across devices
+              {t('signInToSync')}
             </p>
             <Button 
               variant="islamic" 
@@ -100,14 +88,14 @@ export default function MobileProfile() {
               onClick={() => navigate('/mobile/auth')}
             >
               <LogIn className="mr-2 h-4 w-4" />
-              Sign In or Create Account
+              {t('signInOrCreate')}
             </Button>
           </CardContent>
         </Card>
 
         {/* App Version */}
         <p className="text-center text-xs text-muted-foreground">
-          Silent Masjid v1.0.0
+          {t('appName')} v1.0.0
         </p>
       </div>
     );
@@ -134,12 +122,10 @@ export default function MobileProfile() {
               </p>
               <Badge variant="gold" className="mt-2">
                 <Flame className="mr-1 h-3 w-3" />
-                {streak.current_streak} Day Streak
+                {streak.current_streak} {t('days')}
               </Badge>
             </div>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-5 w-5" />
-            </Button>
+            <LanguageSelector />
           </div>
         </CardContent>
       </Card>
@@ -147,11 +133,11 @@ export default function MobileProfile() {
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-3">
         {stats.map((stat) => (
-          <Card key={stat.label}>
+          <Card key={stat.labelKey}>
             <CardContent className="flex flex-col items-center p-4 text-center">
               <stat.icon className={`mb-1 h-5 w-5 ${stat.color}`} />
               <p className="font-serif text-2xl font-bold">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
+              <p className="text-xs text-muted-foreground">{t(stat.labelKey)}</p>
             </CardContent>
           </Card>
         ))}
@@ -161,12 +147,12 @@ export default function MobileProfile() {
       <Card>
         <CardContent className="p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-serif text-lg font-semibold">This Week</h3>
-            <Badge variant="secondary">{streak.weekly_visits}/{streak.weekly_goal} visits</Badge>
+            <h3 className="font-serif text-lg font-semibold">{t('thisWeek')}</h3>
+            <Badge variant="secondary">{streak.weekly_visits}/{streak.weekly_goal} {t('visits')}</Badge>
           </div>
           <div className="grid grid-cols-7 gap-2">
             {streakHistory.map((day) => (
-              <div key={day.day} className="text-center">
+              <div key={day.dayKey} className="text-center">
                 <div
                   className={`mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full ${
                     day.active
@@ -180,7 +166,7 @@ export default function MobileProfile() {
                     <span className="text-lg">·</span>
                   )}
                 </div>
-                <span className="text-xs text-muted-foreground">{day.day}</span>
+                <span className="text-xs text-muted-foreground">{t(day.dayKey)}</span>
               </div>
             ))}
           </div>
@@ -191,14 +177,14 @@ export default function MobileProfile() {
       <Card>
         <CardContent className="p-0">
           {menuItems.map((item, index) => (
-            <div key={item.label}>
+            <div key={item.labelKey}>
               <button 
                 className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50"
                 onClick={() => navigate(item.route)}
               >
                 <div className="flex items-center gap-3">
                   <item.icon className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <span className="text-sm font-medium">{t(item.labelKey)}</span>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -215,12 +201,12 @@ export default function MobileProfile() {
         onClick={handleSignOut}
       >
         <LogOut className="mr-2 h-4 w-4" />
-        Sign Out
+        {t('signOut')}
       </Button>
 
       {/* App Version */}
       <p className="text-center text-xs text-muted-foreground">
-        Silent Masjid v1.0.0
+        {t('appName')} v1.0.0
       </p>
     </div>
   );

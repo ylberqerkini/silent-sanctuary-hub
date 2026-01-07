@@ -1,16 +1,19 @@
 import { Home, MapPin, Bell, User, Heart } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { to: "/mobile", icon: Home, label: "Home" },
-  { to: "/mobile/mosques", icon: MapPin, label: "Mosques" },
-  { to: "/mobile/notifications", icon: Bell, label: "Alerts" },
-  { to: "/mobile/donate", icon: Heart, label: "Donate" },
-  { to: "/mobile/profile", icon: User, label: "Profile" },
-];
+import { useLanguage } from "@/hooks/use-language";
 
 export function MobileNavbar() {
+  const { t } = useLanguage();
+
+  const navItems = [
+    { to: "/mobile", icon: Home, labelKey: "home" },
+    { to: "/mobile/mosques", icon: MapPin, labelKey: "mosques" },
+    { to: "/mobile/notifications", icon: Bell, labelKey: "alerts" },
+    { to: "/mobile/donate", icon: Heart, labelKey: "donate" },
+    { to: "/mobile/profile", icon: User, labelKey: "profile" },
+  ];
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-lg safe-area-bottom">
       <div className="flex items-center justify-around py-2">
@@ -38,7 +41,7 @@ export function MobileNavbar() {
                   strokeWidth={isActive ? 2.5 : 2}
                 />
                 <span className={cn(isActive && "font-medium")}>
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
               </>
             )}
