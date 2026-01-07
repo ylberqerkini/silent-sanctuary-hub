@@ -6,13 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { GeofenceStatus } from "@/components/mobile/GeofenceStatus";
 import { PrayerTimesCard } from "@/components/mobile/PrayerTimesCard";
+import { LanguageSelector } from "@/components/mobile/LanguageSelector";
 import { useUserStreaks } from "@/hooks/use-user-streaks";
 import { useGeofencing } from "@/hooks/use-geofencing";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function MobileHome() {
   const navigate = useNavigate();
   const { streak } = useUserStreaks();
   const { nearbyMosques, currentPosition, calculateDistance } = useGeofencing();
+  const { t } = useLanguage();
 
   // Calculate distances for nearby mosques
   const mosquesWithDistance = nearbyMosques.map(mosque => {
@@ -30,12 +33,16 @@ export default function MobileHome() {
   }).slice(0, 3);
 
   const streakPercentage = Math.min((streak.weekly_visits / streak.weekly_goal) * 100, 100);
+  const visitsRemaining = streak.weekly_goal - streak.weekly_visits;
 
   return (
     <div className="space-y-5 stagger-children">
       {/* Header with Islamic Branding */}
       <div className="relative text-center py-2">
         <div className="absolute inset-0 bg-gradient-to-b from-emerald/5 to-transparent rounded-2xl" />
+        <div className="absolute top-0 right-0">
+          <LanguageSelector />
+        </div>
         <div className="relative">
           <div className="mb-2 flex items-center justify-center gap-2">
             <div className="relative">
@@ -43,11 +50,11 @@ export default function MobileHome() {
               <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-gold animate-pulse-gentle" />
             </div>
             <h1 className="font-serif text-2xl font-bold gradient-text">
-              Silent Masjid
+              {t('appName')}
             </h1>
           </div>
           <p className="text-sm text-muted-foreground font-light tracking-wide">
-            Connect to Allah. Disconnect from Dunyah.
+            {t('tagline')}
           </p>
         </div>
       </div>
@@ -68,9 +75,9 @@ export default function MobileHome() {
                 )}
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wider text-gold-dark font-medium mb-0.5">Current Streak</p>
+                <p className="text-xs uppercase tracking-wider text-gold-dark font-medium mb-0.5">{t('currentStreak')}</p>
                 <p className="font-serif text-3xl font-bold text-foreground leading-none">
-                  {streak.current_streak} <span className="text-lg text-muted-foreground">days</span>
+                  {streak.current_streak} <span className="text-lg text-muted-foreground">{t('days')}</span>
                 </p>
               </div>
             </div>
@@ -78,8 +85,8 @@ export default function MobileHome() {
           
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Weekly progress</span>
-              <span className="font-semibold text-gold-dark">{streak.weekly_visits}/{streak.weekly_goal} visits</span>
+              <span className="text-muted-foreground">{t('weeklyProgress')}</span>
+              <span className="font-semibold text-gold-dark">{streak.weekly_visits}/{streak.weekly_goal} {t('visits')}</span>
             </div>
             <div className="relative">
               <Progress value={streakPercentage} className="h-2.5 bg-gold/20" />
@@ -90,10 +97,10 @@ export default function MobileHome() {
               )}
             </div>
             {streakPercentage >= 100 ? (
-              <p className="text-xs text-emerald font-medium text-center mt-1">Weekly goal achieved! Masha'Allah! 🎉</p>
+              <p className="text-xs text-emerald font-medium text-center mt-1">{t('weeklyGoalAchieved')} 🎉</p>
             ) : (
               <p className="text-xs text-muted-foreground text-center mt-1">
-                {streak.weekly_goal - streak.weekly_visits} more {streak.weekly_goal - streak.weekly_visits === 1 ? 'visit' : 'visits'} to reach your goal
+                {visitsRemaining} {t('moreVisitsToGoal')}
               </p>
             )}
           </div>
@@ -113,7 +120,7 @@ export default function MobileHome() {
           <div className="p-2.5 rounded-xl bg-emerald/10 group-hover:bg-emerald/20 transition-colors">
             <Compass className="h-6 w-6 text-emerald" />
           </div>
-          <span className="text-sm font-medium text-foreground">Qibla Finder</span>
+          <span className="text-sm font-medium text-foreground">{t('qiblaFinder')}</span>
         </Button>
         <Button 
           variant="outline" 
@@ -123,7 +130,7 @@ export default function MobileHome() {
           <div className="p-2.5 rounded-xl bg-gold/10 group-hover:bg-gold/20 transition-colors">
             <span className="text-2xl">💝</span>
           </div>
-          <span className="text-sm font-medium text-foreground">Donate</span>
+          <span className="text-sm font-medium text-foreground">{t('donate')}</span>
         </Button>
       </div>
 
@@ -142,7 +149,7 @@ export default function MobileHome() {
               <div className="p-1.5 rounded-lg bg-emerald/10">
                 <MapPin className="h-4 w-4 text-emerald" />
               </div>
-              <h3 className="font-serif text-lg font-semibold">Nearby Mosques</h3>
+              <h3 className="font-serif text-lg font-semibold">{t('nearbyMosques')}</h3>
             </div>
             <Button 
               variant="ghost" 
@@ -150,7 +157,7 @@ export default function MobileHome() {
               className="text-emerald hover:text-emerald-dark hover:bg-emerald/10 gap-1 pr-2"
               onClick={() => navigate('/mobile/mosques')}
             >
-              View All
+              {t('viewAll')}
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -173,7 +180,7 @@ export default function MobileHome() {
                   </div>
                   {parseFloat(mosque.distance) < 0.5 && (
                     <Badge variant="approved" className="text-[10px] px-2 py-0.5">
-                      Nearby
+                      {t('nearby')}
                     </Badge>
                   )}
                 </div>
@@ -183,7 +190,7 @@ export default function MobileHome() {
                 <div className="mx-auto w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
                   <MapPin className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground">Enable location to see nearby mosques</p>
+                <p className="text-sm text-muted-foreground">{t('enableLocation')}</p>
               </div>
             )}
           </div>
@@ -200,11 +207,11 @@ export default function MobileHome() {
             </div>
             <div className="flex-1">
               <p className="font-serif text-base font-medium leading-relaxed">
-                "When you enter the masjid, silence your phone and your heart for Allah."
+                {t('silenceReminder')}
               </p>
               <div className="mt-3 flex items-center gap-2">
                 <div className="h-px flex-1 bg-white/20" />
-                <p className="text-xs opacity-70 font-light">Daily Reminder</p>
+                <p className="text-xs opacity-70 font-light">{t('dailyReminder')}</p>
                 <div className="h-px flex-1 bg-white/20" />
               </div>
             </div>

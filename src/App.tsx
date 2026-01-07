@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/use-auth";
-
+import { LanguageProvider } from "./hooks/use-language";
 // Admin Pages
 import Index from "./pages/Index";
 import Mosques from "./pages/Mosques";
@@ -32,42 +32,44 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Admin Panel Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/mosques" element={<Mosques />} />
-            <Route path="/submissions" element={<Submissions />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/donations" element={<Donations />} />
-            <Route path="/ideas" element={<Ideas />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/settings" element={<Settings />} />
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Admin Panel Routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/mosques" element={<Mosques />} />
+              <Route path="/submissions" element={<Submissions />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/donations" element={<Donations />} />
+              <Route path="/ideas" element={<Ideas />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/settings" element={<Settings />} />
 
-            {/* Mobile App Routes */}
-            <Route path="/mobile" element={<MobileLayout><MobileHome /></MobileLayout>} />
-            <Route path="/mobile/mosques" element={<MobileLayout><MobileMosques /></MobileLayout>} />
-            <Route path="/mobile/map" element={<MobileMapView />} />
-            <Route path="/mobile/qibla" element={<MobileLayout><MobileQibla /></MobileLayout>} />
-            <Route path="/mobile/notifications" element={<MobileLayout><MobileNotifications /></MobileLayout>} />
-            <Route path="/mobile/donate" element={<MobileLayout><MobileDonate /></MobileLayout>} />
-            <Route path="/mobile/profile" element={<MobileLayout><MobileProfile /></MobileLayout>} />
-            <Route path="/mobile/auth" element={<MobileAuth />} />
-            
-            {/* Legacy routes - redirect to new paths */}
-            <Route path="/app" element={<MobileLayout><MobileHome /></MobileLayout>} />
-            <Route path="/app/mosques" element={<MobileLayout><MobileMosques /></MobileLayout>} />
-            <Route path="/app/notifications" element={<MobileLayout><MobileNotifications /></MobileLayout>} />
-            <Route path="/app/donate" element={<MobileLayout><MobileDonate /></MobileLayout>} />
-            <Route path="/app/profile" element={<MobileLayout><MobileProfile /></MobileLayout>} />
+              {/* Mobile App Routes */}
+              <Route path="/mobile" element={<MobileLayout><MobileHome /></MobileLayout>} />
+              <Route path="/mobile/mosques" element={<MobileLayout><MobileMosques /></MobileLayout>} />
+              <Route path="/mobile/map" element={<MobileMapView />} />
+              <Route path="/mobile/qibla" element={<MobileLayout><MobileQibla /></MobileLayout>} />
+              <Route path="/mobile/notifications" element={<MobileLayout><MobileNotifications /></MobileLayout>} />
+              <Route path="/mobile/donate" element={<MobileLayout><MobileDonate /></MobileLayout>} />
+              <Route path="/mobile/profile" element={<MobileLayout><MobileProfile /></MobileLayout>} />
+              <Route path="/mobile/auth" element={<MobileAuth />} />
+              
+              {/* Legacy routes - redirect to new paths */}
+              <Route path="/app" element={<MobileLayout><MobileHome /></MobileLayout>} />
+              <Route path="/app/mosques" element={<MobileLayout><MobileMosques /></MobileLayout>} />
+              <Route path="/app/notifications" element={<MobileLayout><MobileNotifications /></MobileLayout>} />
+              <Route path="/app/donate" element={<MobileLayout><MobileDonate /></MobileLayout>} />
+              <Route path="/app/profile" element={<MobileLayout><MobileProfile /></MobileLayout>} />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

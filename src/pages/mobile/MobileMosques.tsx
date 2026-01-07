@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Search, Navigation, Star, Clock, Plus, Heart, Map } from "lucide-react";
+import { MapPin, Search, Navigation, Star, Plus, Heart, Map } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGeofencing, Mosque } from "@/hooks/use-geofencing";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/use-language";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -15,14 +16,16 @@ export default function MobileMosques() {
   const [searchQuery, setSearchQuery] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { 
     allMosques, 
-    nearbyMosques: geofenceNearby, 
     currentPosition, 
     calculateDistance,
     startTracking,
     isTracking 
   } = useGeofencing();
+
+  const navigate = useNavigate();
 
   // Fetch user favorites
   useEffect(() => {
@@ -52,7 +55,7 @@ export default function MobileMosques() {
   // Toggle favorite
   const toggleFavorite = async (mosqueId: string) => {
     if (!user) {
-      toast.error('Please sign in to save favorites');
+      toast.error(t('pleaseSignInToSaveFavorites'));
       return;
     }
 
@@ -67,7 +70,7 @@ export default function MobileMosques() {
 
       if (!error) {
         setFavorites(prev => prev.filter(id => id !== mosqueId));
-        toast.success('Removed from favorites');
+        toast.success(t('removedFromFavorites'));
       }
     } else {
       const { error } = await supabase
@@ -76,7 +79,7 @@ export default function MobileMosques() {
 
       if (!error) {
         setFavorites(prev => [...prev, mosqueId]);
-        toast.success('Added to favorites');
+        toast.success(t('addedToFavorites'));
       }
     }
   };
@@ -112,18 +115,16 @@ export default function MobileMosques() {
 
   const favoriteMosques = filteredMosques.filter((m) => m.isFavorite);
 
-  const navigate = useNavigate();
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold text-foreground">
-            Mosques
+            {t('mosques')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Find mosques near you
+            {t('findMosquesNearYou')}
           </p>
         </div>
         <Button 
@@ -132,7 +133,7 @@ export default function MobileMosques() {
           onClick={() => navigate('/mobile/map')}
         >
           <Map className="mr-1 h-4 w-4" />
-          Map
+          {t('map')}
         </Button>
       </div>
 
@@ -140,7 +141,7 @@ export default function MobileMosques() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search mosques..."
+          placeholder={t('searchMosques')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
@@ -150,8 +151,8 @@ export default function MobileMosques() {
       {/* Tabs */}
       <Tabs defaultValue="nearby" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="nearby">Nearby</TabsTrigger>
-          <TabsTrigger value="favorites">Favorites ({favoriteMosques.length})</TabsTrigger>
+          <TabsTrigger value="nearby">{t('nearby')}</TabsTrigger>
+          <TabsTrigger value="favorites">{t('favorites')} ({favoriteMosques.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="nearby" className="mt-4 space-y-3">
@@ -168,7 +169,7 @@ export default function MobileMosques() {
               <CardContent className="flex flex-col items-center justify-center py-8 text-center">
                 <MapPin className="mb-2 h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  No mosques found
+                  {t('noMosquesFound')}
                 </p>
               </CardContent>
             </Card>
@@ -189,10 +190,10 @@ export default function MobileMosques() {
               <CardContent className="flex flex-col items-center justify-center py-8 text-center">
                 <Star className="mb-2 h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  No favorite mosques yet
+                  {t('noFavoritesYet')}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Tap the heart icon to add favorites
+                  {t('tapHeartToAdd')}
                 </p>
               </CardContent>
             </Card>
@@ -203,7 +204,7 @@ export default function MobileMosques() {
       {/* Submit Mosque Button */}
       <Button variant="outline" className="w-full">
         <Plus className="mr-2 h-4 w-4" />
-        Submit New Mosque
+        {t('submitNewMosque')}
       </Button>
     </div>
   );
@@ -215,8 +216,9 @@ interface MosqueCardProps {
 }
 
 function MosqueCard({ mosque, onToggleFavorite }: MosqueCardProps) {
+  const { t } = useLanguage();
+  
   const handleNavigate = () => {
-    // Open in maps app
     const url = `https://www.google.com/maps/dir/?api=1&destination=${mosque.latitude},${mosque.longitude}`;
     window.open(url, '_blank');
   };
@@ -233,11 +235,11 @@ function MosqueCard({ mosque, onToggleFavorite }: MosqueCardProps) {
               <div className="flex items-center gap-2">
                 <h3 className="font-medium">{mosque.name}</h3>
                 {mosque.is_verified && (
-                  <Badge variant="approved" className="text-[10px]">Verified</Badge>
+                  <Badge variant="approved" className="text-[10px]">{t('verified')}</Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                {mosque.address || mosque.city || 'Address not available'}
+                {mosque.address || mosque.city || t('addressNotAvailable')}
               </p>
               <div className="mt-2 flex items-center gap-3 text-xs">
                 <span className="flex items-center gap-1 text-emerald">
@@ -267,12 +269,12 @@ function MosqueCard({ mosque, onToggleFavorite }: MosqueCardProps) {
         <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
-              {mosque.geofence_radius}m radius
+              {mosque.geofence_radius}m {t('radius')}
             </Badge>
           </div>
           <Button variant="islamic" size="sm" onClick={handleNavigate}>
             <Navigation className="mr-1 h-3 w-3" />
-            Navigate
+            {t('navigate')}
           </Button>
         </div>
       </CardContent>
