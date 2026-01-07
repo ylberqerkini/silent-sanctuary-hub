@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   Moon,
+  Smartphone,
 } from "lucide-react";
 
 const navigation = [
@@ -22,6 +23,7 @@ const navigation = [
   { name: "Ideas", href: "/ideas", icon: Lightbulb },
   { name: "Notifications", href: "/notifications", icon: Bell },
   { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Preview App", href: "/mobile", icon: Smartphone },
 ];
 
 export function AdminSidebar() {
