@@ -10,6 +10,10 @@ interface PrayerTimesCardProps {
   compact?: boolean;
 }
 
+// Default coordinates for Pristina, Kosovo (for Albanian users)
+const DEFAULT_LATITUDE = 42.6629;
+const DEFAULT_LONGITUDE = 21.1655;
+
 const PRAYER_ICONS: Record<string, React.ReactNode> = {
   Fajr: <Moon className="h-4 w-4" />,
   Sunrise: <Sun className="h-4 w-4" />,
@@ -29,9 +33,13 @@ const PRAYER_NAMES_AR: Record<string, string> = {
 };
 
 export function PrayerTimesCard({ latitude, longitude, compact = false }: PrayerTimesCardProps) {
+  // Use provided coordinates or fall back to Pristina, Kosovo
+  const effectiveLatitude = latitude ?? DEFAULT_LATITUDE;
+  const effectiveLongitude = longitude ?? DEFAULT_LONGITUDE;
+  
   const { prayerTimes, isLoading, error, nextPrayer, currentPrayer, refetch } = usePrayerTimes(
-    latitude,
-    longitude
+    effectiveLatitude,
+    effectiveLongitude
   );
 
   if (isLoading) {
