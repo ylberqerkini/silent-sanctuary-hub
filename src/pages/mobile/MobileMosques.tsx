@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Search, Navigation, Star, Plus, Heart, Map } from "lucide-react";
+import { MapPin, Search, Navigation, Star, Plus, Heart, Map, Loader2, RefreshCw, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGeofencing, Mosque } from "@/hooks/use-geofencing";
+import { useNearbyMosques, NearbyMosque } from "@/hooks/use-nearby-mosques";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/use-language";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,14 +19,24 @@ export default function MobileMosques() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { 
-    allMosques, 
     currentPosition, 
-    calculateDistance,
     startTracking,
     isTracking 
   } = useGeofencing();
 
   const navigate = useNavigate();
+
+  // Fetch mosques from OpenStreetMap based on user's location
+  const { 
+    mosques: nearbyMosques, 
+    isLoading: isLoadingMosques, 
+    error: mosquesError,
+    refetch: refetchMosques 
+  } = useNearbyMosques(
+    currentPosition?.coords.latitude,
+    currentPosition?.coords.longitude,
+    50 // 50km radius
+  );
 
   // Fetch user favorites
   useEffect(() => {
@@ -84,34 +95,17 @@ export default function MobileMosques() {
     }
   };
 
-  // Calculate distances and sort mosques
-  const mosquesWithDistance = allMosques.map(mosque => {
-    let distance = 'N/A';
-    let distanceMeters = Infinity;
-    
-    if (currentPosition) {
-      distanceMeters = calculateDistance(
-        currentPosition.coords.latitude,
-        currentPosition.coords.longitude,
-        Number(mosque.latitude),
-        Number(mosque.longitude)
-      );
-      const distanceInMiles = (distanceMeters / 1609.34).toFixed(1);
-      distance = `${distanceInMiles} mi`;
-    }
-    
-    return { 
-      ...mosque, 
-      distance, 
-      distanceMeters,
-      isFavorite: favorites.includes(mosque.id) 
-    };
-  }).sort((a, b) => a.distanceMeters - b.distanceMeters);
-
-  const filteredMosques = mosquesWithDistance.filter((mosque) =>
-    mosque.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    mosque.city?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter mosques by search query
+  const filteredMosques = nearbyMosques
+    .map(mosque => ({
+      ...mosque,
+      isFavorite: favorites.includes(mosque.id)
+    }))
+    .filter((mosque) =>
+      mosque.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      mosque.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      mosque.address?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const favoriteMosques = filteredMosques.filter((m) => m.isFavorite);
 
@@ -127,15 +121,33 @@ export default function MobileMosques() {
             {t('findMosquesNearYou')}
           </p>
         </div>
-        <Button 
-          variant="islamic" 
-          size="sm"
-          onClick={() => navigate('/mobile/map')}
-        >
-          <Map className="mr-1 h-4 w-4" />
-          {t('map')}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={refetchMosques}
+            disabled={isLoadingMosques}
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoadingMosques ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button 
+            variant="islamic" 
+            size="sm"
+            onClick={() => navigate('/mobile/map')}
+          >
+            <Map className="mr-1 h-4 w-4" />
+            {t('map')}
+          </Button>
+        </div>
       </div>
+
+      {/* Location info */}
+      {currentPosition && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+          <Globe className="h-3 w-3" />
+          <span>{t('searchingNearby')} ({nearbyMosques.length} {t('found')})</span>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative">
@@ -156,7 +168,25 @@ export default function MobileMosques() {
         </TabsList>
 
         <TabsContent value="nearby" className="mt-4 space-y-3">
-          {filteredMosques.length > 0 ? (
+          {isLoadingMosques ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald mb-2" />
+                <p className="text-sm text-muted-foreground">{t('searchingMosques')}</p>
+              </CardContent>
+            </Card>
+          ) : mosquesError ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                <MapPin className="mb-2 h-8 w-8 text-destructive" />
+                <p className="text-sm text-muted-foreground mb-2">{mosquesError}</p>
+                <Button variant="outline" size="sm" onClick={refetchMosques}>
+                  <RefreshCw className="mr-1 h-3 w-3" />
+                  {t('retry')}
+                </Button>
+              </CardContent>
+            </Card>
+          ) : filteredMosques.length > 0 ? (
             filteredMosques.map((mosque) => (
               <MosqueCard 
                 key={mosque.id} 
@@ -169,7 +199,7 @@ export default function MobileMosques() {
               <CardContent className="flex flex-col items-center justify-center py-8 text-center">
                 <MapPin className="mb-2 h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  {t('noMosquesFound')}
+                  {currentPosition ? t('noMosquesFound') : t('enableLocation')}
                 </p>
               </CardContent>
             </Card>
@@ -211,7 +241,7 @@ export default function MobileMosques() {
 }
 
 interface MosqueCardProps {
-  mosque: Mosque & { distance: string; distanceMeters: number; isFavorite: boolean };
+  mosque: NearbyMosque & { isFavorite: boolean };
   onToggleFavorite: () => void;
 }
 
@@ -234,8 +264,8 @@ function MosqueCard({ mosque, onToggleFavorite }: MosqueCardProps) {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-medium">{mosque.name}</h3>
-                {mosque.is_verified && (
-                  <Badge variant="approved" className="text-[10px]">{t('verified')}</Badge>
+                {mosque.source === 'openstreetmap' && (
+                  <Badge variant="secondary" className="text-[10px]">OSM</Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -244,7 +274,7 @@ function MosqueCard({ mosque, onToggleFavorite }: MosqueCardProps) {
               <div className="mt-2 flex items-center gap-3 text-xs">
                 <span className="flex items-center gap-1 text-emerald">
                   <Navigation className="h-3 w-3" />
-                  {mosque.distance}
+                  {mosque.distanceText}
                 </span>
                 {mosque.city && (
                   <span className="text-muted-foreground">
@@ -266,12 +296,7 @@ function MosqueCard({ mosque, onToggleFavorite }: MosqueCardProps) {
           </Button>
         </div>
 
-        <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
-              {mosque.geofence_radius}m {t('radius')}
-            </Badge>
-          </div>
+        <div className="mt-3 flex items-center justify-end border-t border-border pt-3">
           <Button variant="islamic" size="sm" onClick={handleNavigate}>
             <Navigation className="mr-1 h-3 w-3" />
             {t('navigate')}

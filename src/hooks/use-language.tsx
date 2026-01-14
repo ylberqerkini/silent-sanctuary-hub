@@ -127,6 +127,9 @@ export const translations: Translations = {
   addedToFavorites: { sq: 'U shtua te preferuarat', en: 'Added to favorites' },
   removedFromFavorites: { sq: 'U hoq nga preferuarat', en: 'Removed from favorites' },
   pleaseSignInToSaveFavorites: { sq: 'Identifikohu për të ruajtur preferuarat', en: 'Please sign in to save favorites' },
+  searchingNearby: { sq: 'Duke kërkuar afër vendndodhjes suaj', en: 'Searching near your location' },
+  found: { sq: 'u gjetën', en: 'found' },
+  searchingMosques: { sq: 'Duke kërkuar xhamitë afër...', en: 'Searching for nearby mosques...' },
   
   // Days
   mon: { sq: 'Hën', en: 'Mon' },
