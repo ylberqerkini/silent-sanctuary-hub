@@ -272,8 +272,19 @@ function MosqueCard({ mosque, onToggleFavorite }: MosqueCardProps) {
   const { t } = useLanguage();
   
   const handleNavigate = () => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${mosque.latitude},${mosque.longitude}`;
-    window.open(url, '_blank');
+    const destination = `${mosque.latitude},${mosque.longitude}`;
+    
+    // Detect iOS devices
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (isIOS) {
+      // Open Apple Maps with directions
+      window.open(`maps://maps.apple.com/?daddr=${destination}&dirflg=d`, '_self');
+    } else {
+      // Open Google Maps with directions (works on Android and web)
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_blank');
+    }
   };
 
   return (
