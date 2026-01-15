@@ -101,7 +101,7 @@ export function PrayerTimesCard({ latitude, longitude, compact = false }: Prayer
                 }`}
               >
                 <p className="text-[10px] text-muted-foreground uppercase">{prayer}</p>
-                <p className="text-sm font-semibold">{formatTime12h(timings[prayer])}</p>
+                <p className="text-sm font-semibold">{formatTime24h(timings[prayer])}</p>
               </div>
             ))}
           </div>
@@ -139,7 +139,7 @@ export function PrayerTimesCard({ latitude, longitude, compact = false }: Prayer
                 <p className="text-xl font-bold text-emerald">{nextPrayer.name}</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold">{formatTime12h(nextPrayer.time)}</p>
+                <p className="text-2xl font-bold">{formatTime24h(nextPrayer.time)}</p>
                 <p className="text-xs text-muted-foreground">in {nextPrayer.remainingTime}</p>
               </div>
             </div>
@@ -180,7 +180,7 @@ export function PrayerTimesCard({ latitude, longitude, compact = false }: Prayer
                 </div>
                 <div className="text-right">
                   <p className={`font-semibold ${isNext || isCurrent ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    {formatTime12h(timings[prayer])}
+                    {formatTime24h(timings[prayer])}
                   </p>
                   {isNext && (
                     <Badge variant="gold" className="text-[10px] mt-1">
@@ -202,11 +202,10 @@ export function PrayerTimesCard({ latitude, longitude, compact = false }: Prayer
   );
 }
 
-function formatTime12h(time24: string): string {
-  const [hours, minutes] = time24.split(':').map(Number);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const hours12 = hours % 12 || 12;
-  return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+function formatTime24h(time: string): string {
+  // Time comes in format "HH:mm" or "HH:mm (TZ)" - extract just the time
+  const timePart = time.split(' ')[0];
+  return timePart;
 }
 
 export default PrayerTimesCard;
