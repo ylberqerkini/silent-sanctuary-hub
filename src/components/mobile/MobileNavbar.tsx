@@ -1,4 +1,4 @@
-import { Home, MapPin, Bell, User, Heart } from "lucide-react";
+import { Home, MapPin, Bell, User, Compass } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/use-language";
@@ -9,8 +9,8 @@ export function MobileNavbar() {
   const navItems = [
     { to: "/mobile", icon: Home, labelKey: "home" },
     { to: "/mobile/mosques", icon: MapPin, labelKey: "mosques" },
+    { to: "/mobile/qibla", icon: Compass, labelKey: "qibla" },
     { to: "/mobile/notifications", icon: Bell, labelKey: "alerts" },
-    { to: "/mobile/donate", icon: Heart, labelKey: "donate" },
     { to: "/mobile/profile", icon: User, labelKey: "profile" },
   ];
 
