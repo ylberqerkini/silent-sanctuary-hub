@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQibla, calculateDistanceToKaaba } from '@/hooks/use-qibla';
 import { Geolocation } from '@capacitor/geolocation';
+import { CompassCalibrationGuide } from './CompassCalibrationGuide';
 
 export function QiblaCompass() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -221,9 +222,19 @@ export function QiblaCompass() {
 
           {/* Live indicator */}
           {hasPermission && qiblaFromDevice !== null && (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald animate-pulse" />
-              <span className="text-xs text-muted-foreground">Live compass active</span>
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald animate-pulse" />
+                <span className="text-xs text-muted-foreground">Live compass active</span>
+              </div>
+              <CompassCalibrationGuide variant="link" />
+            </div>
+          )}
+
+          {/* Calibration guide for when compass is not yet enabled */}
+          {isSupported && !hasPermission && (
+            <div className="flex justify-center mt-2">
+              <CompassCalibrationGuide variant="link" />
             </div>
           )}
         </div>

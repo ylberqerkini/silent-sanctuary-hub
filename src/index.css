@@ -1,4 +1,48 @@
 @tailwind base;
+
+/* Figure-8 animation for compass calibration */
+@keyframes figureEight {
+  0%, 100% {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  12.5% {
+    left: 65%;
+    top: 25%;
+    transform: translate(-50%, -50%);
+  }
+  25% {
+    left: 80%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  37.5% {
+    left: 65%;
+    top: 75%;
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  62.5% {
+    left: 35%;
+    top: 25%;
+    transform: translate(-50%, -50%);
+  }
+  75% {
+    left: 20%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  87.5% {
+    left: 35%;
+    top: 75%;
+    transform: translate(-50%, -50%);
+  }
+}
 @tailwind components;
 @tailwind utilities;
 
