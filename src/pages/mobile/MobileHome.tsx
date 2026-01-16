@@ -111,26 +111,36 @@ export default function MobileHome() {
       <GeofenceStatus />
 
       {/* Quick Actions - Enhanced Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <Button 
           variant="outline" 
-          className="h-auto py-5 flex-col gap-3 border-emerald/20 bg-gradient-to-br from-emerald/5 to-transparent hover:from-emerald/15 hover:to-emerald/5 hover:border-emerald/40 transition-all duration-300 group rounded-xl shadow-sm"
+          className="h-auto py-4 flex-col gap-2 border-emerald/20 bg-gradient-to-br from-emerald/5 to-transparent hover:from-emerald/15 hover:to-emerald/5 hover:border-emerald/40 transition-all duration-300 group rounded-xl shadow-sm"
           onClick={() => navigate('/mobile/qibla')}
         >
-          <div className="p-2.5 rounded-xl bg-emerald/10 group-hover:bg-emerald/20 transition-colors">
-            <Compass className="h-6 w-6 text-emerald" />
+          <div className="p-2 rounded-xl bg-emerald/10 group-hover:bg-emerald/20 transition-colors">
+            <Compass className="h-5 w-5 text-emerald" />
           </div>
-          <span className="text-sm font-medium text-foreground">{t('qiblaFinder')}</span>
+          <span className="text-xs font-medium text-foreground">{t('qiblaFinder')}</span>
         </Button>
         <Button 
           variant="outline" 
-          className="h-auto py-5 flex-col gap-3 border-gold/20 bg-gradient-to-br from-gold/5 to-transparent hover:from-gold/15 hover:to-gold/5 hover:border-gold/40 transition-all duration-300 group rounded-xl shadow-sm"
+          className="h-auto py-4 flex-col gap-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:from-primary/15 hover:to-primary/5 hover:border-primary/40 transition-all duration-300 group rounded-xl shadow-sm"
+          onClick={() => navigate('/mobile/umrah')}
+        >
+          <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+            <span className="text-xl">🕋</span>
+          </div>
+          <span className="text-xs font-medium text-foreground">{t('umrahMode')}</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex-col gap-2 border-gold/20 bg-gradient-to-br from-gold/5 to-transparent hover:from-gold/15 hover:to-gold/5 hover:border-gold/40 transition-all duration-300 group rounded-xl shadow-sm"
           onClick={() => navigate('/mobile/donate')}
         >
-          <div className="p-2.5 rounded-xl bg-gold/10 group-hover:bg-gold/20 transition-colors">
-            <span className="text-2xl">💝</span>
+          <div className="p-2 rounded-xl bg-gold/10 group-hover:bg-gold/20 transition-colors">
+            <span className="text-xl">💝</span>
           </div>
-          <span className="text-sm font-medium text-foreground">{t('donate')}</span>
+          <span className="text-xs font-medium text-foreground">{t('donate')}</span>
         </Button>
       </div>
 

@@ -34,6 +34,8 @@ export const translations: Translations = {
   start: { sq: 'Fillo', en: 'Start' },
   stop: { sq: 'Ndalo', en: 'Stop' },
   qiblaFinder: { sq: 'Gjej Kiblen', en: 'Qibla Finder' },
+  umrahMode: { sq: 'Umra', en: 'Umrah Mode' },
+  qibla: { sq: 'Kibla', en: 'Qibla' },
   nearbyMosques: { sq: 'Xhamitë Afër', en: 'Nearby Mosques' },
   viewAll: { sq: 'Shiko të Gjitha', en: 'View All' },
   enableLocation: { sq: 'Aktivizo vendndodhjen për të parë xhamitë afër', en: 'Enable location to see nearby mosques' },
