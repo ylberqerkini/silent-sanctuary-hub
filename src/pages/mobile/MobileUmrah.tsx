@@ -5,9 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  BookOpen, 
+  BookOpen,
   CheckCircle2, 
-  Circle, 
   MapPin, 
   Clock, 
   AlertTriangle,
@@ -15,10 +14,12 @@ import {
   RotateCcw,
   Footprints,
   Scissors,
-  Droplets
+  Droplets,
+  CloudOff
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/use-language';
 import { UmrahStepDetail } from '@/components/mobile/UmrahStepDetail';
+import { useUmrahProgress } from '@/hooks/use-umrah-progress';
 
 interface UmrahStep {
   id: string;
@@ -234,22 +235,11 @@ const umrahSteps: UmrahStep[] = [
 
 export default function MobileUmrah() {
   const { language, t } = useLanguage();
-  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const { completedSteps, toggleStep, resetProgress, isLoaded, getProgressInfo } = useUmrahProgress();
   const [selectedStep, setSelectedStep] = useState<UmrahStep | null>(null);
 
-  const toggleStep = (stepId: string) => {
-    setCompletedSteps(prev => 
-      prev.includes(stepId) 
-        ? prev.filter(id => id !== stepId)
-        : [...prev, stepId]
-    );
-  };
-
   const progress = (completedSteps.length / umrahSteps.length) * 100;
-
-  const resetProgress = () => {
-    setCompletedSteps([]);
-  };
+  const progressInfo = getProgressInfo();
 
   return (
     <div className="space-y-6">
@@ -279,7 +269,30 @@ export default function MobileUmrah() {
               {completedSteps.length}/{umrahSteps.length} {language === 'en' ? 'steps' : 'hapa'}
             </Badge>
           </div>
-          <Progress value={progress} className="h-2 bg-muted" />
+          <Progress value={progress} className="h-2 bg-muted mt-2" />
+          
+          {/* Offline indicator */}
+          <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+            <CloudOff className="h-3 w-3" />
+            <span>
+              {language === 'en' 
+                ? 'Progress saved offline - works without internet' 
+                : 'Progresi ruhet offline - punon pa internet'}
+            </span>
+          </div>
+
+          {progressInfo.lastUpdated && completedSteps.length > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {language === 'en' ? 'Last updated: ' : 'Përditësuar: '}
+              {progressInfo.lastUpdated.toLocaleDateString(language === 'en' ? 'en-US' : 'sq-AL', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          )}
+
           {completedSteps.length === umrahSteps.length && (
             <div className="mt-3 text-center">
               <p className="text-sm text-emerald font-medium">
