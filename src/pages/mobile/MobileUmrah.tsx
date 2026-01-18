@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TawafCounter } from '@/components/mobile/TawafCounter';
 import { 
   BookOpen,
   CheckCircle2, 
@@ -316,12 +317,15 @@ export default function MobileUmrah() {
 
       {/* Tabs for Steps and Important Info */}
       <Tabs defaultValue="steps" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="steps">
             {language === 'en' ? 'Steps' : 'Hapat'}
           </TabsTrigger>
+          <TabsTrigger value="tawaf">
+            {language === 'en' ? 'Tawaf Counter' : 'Numëruesi'}
+          </TabsTrigger>
           <TabsTrigger value="info">
-            {language === 'en' ? 'Important Info' : 'Info të Rëndësishme'}
+            {language === 'en' ? 'Info' : 'Info'}
           </TabsTrigger>
         </TabsList>
 
@@ -396,6 +400,10 @@ export default function MobileUmrah() {
               </Card>
             );
           })}
+        </TabsContent>
+
+        <TabsContent value="tawaf" className="mt-4">
+          <TawafCounter />
         </TabsContent>
 
         <TabsContent value="info" className="mt-4 space-y-4">
