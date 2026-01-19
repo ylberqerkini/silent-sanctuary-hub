@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Bell, Flame, Moon, Compass, Sparkles, ChevronRight } from "lucide-react";
+import { MapPin, Bell, Flame, Moon, Compass, Sparkles, ChevronRight, Sun, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,12 +11,64 @@ import { LanguageSelector } from "@/components/mobile/LanguageSelector";
 import { useUserStreaks } from "@/hooks/use-user-streaks";
 import { useGeofencing } from "@/hooks/use-geofencing";
 import { useLanguage } from "@/hooks/use-language";
+import { useRamadan } from "@/hooks/use-ramadan";
+import { usePrayerTimes } from "@/hooks/use-prayer-times";
+import { cn } from "@/lib/utils";
 
 export default function MobileHome() {
   const navigate = useNavigate();
   const { streak } = useUserStreaks();
   const { nearbyMosques, currentPosition, calculateDistance } = useGeofencing();
   const { t } = useLanguage();
+  const { isRamadan, currentRamadanDay, daysUntilRamadan, progress } = useRamadan();
+  const { prayerTimes } = usePrayerTimes(
+    currentPosition?.coords.latitude, 
+    currentPosition?.coords.longitude
+  );
+  
+  // Countdown state for Ramadan card
+  const [countdown, setCountdown] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [countdownTarget, setCountdownTarget] = useState<"suhoor" | "iftar">("iftar");
+
+  // Calculate Suhoor/Iftar countdown
+  useEffect(() => {
+    if (!prayerTimes || !isRamadan) return;
+
+    const calculateCountdown = () => {
+      const now = new Date();
+      const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      
+      const fajrTime = prayerTimes.timings.Fajr.split(":").map(Number);
+      const maghribTime = prayerTimes.timings.Maghrib.split(":").map(Number);
+      
+      const fajrSeconds = fajrTime[0] * 3600 + fajrTime[1] * 60;
+      const maghribSeconds = maghribTime[0] * 3600 + maghribTime[1] * 60;
+
+      let targetSeconds: number;
+      
+      if (currentTime < fajrSeconds) {
+        targetSeconds = fajrSeconds - currentTime;
+        setCountdownTarget("suhoor");
+      } else if (currentTime < maghribSeconds) {
+        targetSeconds = maghribSeconds - currentTime;
+        setCountdownTarget("iftar");
+      } else {
+        const secondsUntilMidnight = 86400 - currentTime;
+        targetSeconds = secondsUntilMidnight + fajrSeconds;
+        setCountdownTarget("suhoor");
+      }
+
+      setCountdown({
+        hours: Math.floor(targetSeconds / 3600),
+        minutes: Math.floor((targetSeconds % 3600) / 60),
+        seconds: Math.floor(targetSeconds % 60)
+      });
+    };
+
+    calculateCountdown();
+    const interval = setInterval(calculateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [prayerTimes, isRamadan]);
 
   // Calculate distances for nearby mosques
   const mosquesWithDistance = nearbyMosques.map(mosque => {
@@ -104,6 +157,90 @@ export default function MobileHome() {
               </p>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Ramadan Mode Card */}
+      <Card 
+        className={cn(
+          "overflow-hidden border-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]",
+          isRamadan 
+            ? "border-gold/40 bg-gradient-to-br from-gold/20 via-emerald/10 to-gold/20" 
+            : "border-emerald/30 bg-gradient-to-br from-emerald/15 to-gold/10"
+        )}
+        onClick={() => navigate('/mobile/ramadan')}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "relative p-3 rounded-2xl",
+                isRamadan 
+                  ? "bg-gradient-to-br from-gold to-gold-dark" 
+                  : "bg-gradient-to-br from-emerald to-emerald-dark"
+              )}>
+                <Moon className="h-6 w-6 text-white" />
+                {isRamadan && (
+                  <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-gold animate-pulse" />
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-serif text-lg font-bold">
+                    {t("ramadanMode") || "Ramadan Mode"}
+                  </h3>
+                  {isRamadan && (
+                    <Badge variant="gold" className="text-[10px] px-1.5">
+                      {t("live") || "LIVE"}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {isRamadan 
+                    ? `${t("day") || "Day"} ${currentRamadanDay} • ${progress?.totalFasted || 0} ${t("fasted") || "fasted"}`
+                    : daysUntilRamadan > 0 
+                      ? `${daysUntilRamadan} ${t("daysUntilRamadan") || "days until Ramadan"}`
+                      : t("viewRamadanFeatures") || "View Ramadan features"
+                  }
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          {/* Countdown Timer (only during Ramadan) */}
+          {isRamadan && prayerTimes && (
+            <div className="mt-4 pt-3 border-t border-border/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {countdownTarget === "iftar" ? (
+                    <Sun className="h-4 w-4 text-gold" />
+                  ) : (
+                    <Clock className="h-4 w-4 text-emerald" />
+                  )}
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {countdownTarget === "iftar" 
+                      ? (t("iftarIn") || "Iftar in") 
+                      : (t("suhoorEndsIn") || "Suhoor ends in")
+                    }
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 font-mono text-lg font-bold">
+                  <span className={countdownTarget === "iftar" ? "text-gold" : "text-emerald"}>
+                    {String(countdown.hours).padStart(2, "0")}
+                  </span>
+                  <span className="text-muted-foreground">:</span>
+                  <span className={countdownTarget === "iftar" ? "text-gold" : "text-emerald"}>
+                    {String(countdown.minutes).padStart(2, "0")}
+                  </span>
+                  <span className="text-muted-foreground">:</span>
+                  <span className={countdownTarget === "iftar" ? "text-gold" : "text-emerald"}>
+                    {String(countdown.seconds).padStart(2, "0")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
