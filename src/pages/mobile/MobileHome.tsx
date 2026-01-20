@@ -13,6 +13,7 @@ import { useGeofencing } from "@/hooks/use-geofencing";
 import { useLanguage } from "@/hooks/use-language";
 import { useRamadan } from "@/hooks/use-ramadan";
 import { usePrayerTimes } from "@/hooks/use-prayer-times";
+import { useLocationSettings } from "@/hooks/use-location-settings";
 import { cn } from "@/lib/utils";
 
 export default function MobileHome() {
@@ -21,9 +22,10 @@ export default function MobileHome() {
   const { nearbyMosques, currentPosition, calculateDistance } = useGeofencing();
   const { t } = useLanguage();
   const { isRamadan, currentRamadanDay, daysUntilRamadan, progress } = useRamadan();
+  const { settings: locationSettings } = useLocationSettings();
   const { prayerTimes } = usePrayerTimes(
-    currentPosition?.coords.latitude, 
-    currentPosition?.coords.longitude
+    currentPosition?.coords.latitude ?? locationSettings.latitude, 
+    currentPosition?.coords.longitude ?? locationSettings.longitude
   );
   
   // Countdown state for Ramadan card
