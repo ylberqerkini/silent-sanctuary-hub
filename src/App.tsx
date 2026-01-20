@@ -24,6 +24,7 @@ import MobileMapView from "./pages/mobile/MobileMapView";
 import MobileQibla from "./pages/mobile/MobileQibla";
 import MobileUmrah from "./pages/mobile/MobileUmrah";
 import MobileRamadan from "./pages/mobile/MobileRamadan";
+import MobileZakat from "./pages/mobile/MobileZakat";
 import MobileNotifications from "./pages/mobile/MobileNotifications";
 import MobileDonate from "./pages/mobile/MobileDonate";
 import MobileProfile from "./pages/mobile/MobileProfile";
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/mobile/qibla" element={<MobileLayout><MobileQibla /></MobileLayout>} />
               <Route path="/mobile/umrah" element={<MobileLayout><MobileUmrah /></MobileLayout>} />
               <Route path="/mobile/ramadan" element={<MobileLayout><MobileRamadan /></MobileLayout>} />
+              <Route path="/mobile/zakat" element={<MobileZakat />} />
               <Route path="/mobile/notifications" element={<MobileLayout><MobileNotifications /></MobileLayout>} />
               <Route path="/mobile/donate" element={<MobileLayout><MobileDonate /></MobileLayout>} />
               <Route path="/mobile/profile" element={<MobileLayout><MobileProfile /></MobileLayout>} />

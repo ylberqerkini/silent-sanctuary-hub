@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Bell, Flame, Moon, Compass, Sparkles, ChevronRight, Sun, Clock } from "lucide-react";
+import { MapPin, Bell, Flame, Moon, Compass, Sparkles, ChevronRight, Sun, Clock, Calculator } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -272,14 +272,24 @@ export default function MobileHome() {
         <Button 
           variant="outline" 
           className="h-auto py-4 flex-col gap-2 border-gold/20 bg-gradient-to-br from-gold/5 to-transparent hover:from-gold/15 hover:to-gold/5 hover:border-gold/40 transition-all duration-300 group rounded-xl shadow-sm"
-          onClick={() => navigate('/mobile/donate')}
+          onClick={() => navigate('/mobile/zakat')}
         >
           <div className="p-2 rounded-xl bg-gold/10 group-hover:bg-gold/20 transition-colors">
-            <span className="text-xl">💝</span>
+            <Calculator className="h-5 w-5 text-gold" />
           </div>
-          <span className="text-xs font-medium text-foreground">{t('donate')}</span>
+          <span className="text-xs font-medium text-foreground">{t('zakatCalc') || 'Zakat'}</span>
         </Button>
       </div>
+
+      {/* Additional Quick Action */}
+      <Button 
+        variant="outline" 
+        className="w-full h-auto py-3 flex items-center justify-center gap-2 border-gold/20 bg-gradient-to-r from-gold/5 to-gold/10 hover:from-gold/15 hover:to-gold/20 hover:border-gold/40 transition-all duration-300 rounded-xl shadow-sm"
+        onClick={() => navigate('/mobile/donate')}
+      >
+        <span className="text-xl">💝</span>
+        <span className="text-sm font-medium text-foreground">{t('donate')}</span>
+      </Button>
 
       {/* Prayer Times - Real API Data */}
       <PrayerTimesCard 
