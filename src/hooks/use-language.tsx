@@ -105,6 +105,13 @@ export const translations: Translations = {
   noMosquesNearby: { sq: 'Nuk ka xhami afër', en: 'No mosques nearby' },
   locationPermissionDenied: { sq: 'Leja e vendndodhjes u refuzua', en: 'Location permission denied' },
   enableLocationServices: { sq: 'Aktivizo shërbimet e vendndodhjes', en: 'Enable location services' },
+  locationDenied: { sq: 'Qasja në vendndodhje u refuzua. Aktivizoje në cilësimet.', en: 'Location access denied. Please enable in settings.' },
+  gettingLocation: { sq: 'Duke marrë vendndodhjen tuaj...', en: 'Getting your location...' },
+  pleaseAllowLocation: { sq: 'Lejoni qasjen në vendndodhje kur të pyeteni', en: 'Please allow location access when prompted' },
+  locationAccessRequired: { sq: 'Kërkohet Qasje në Vendndodhje', en: 'Location Access Required' },
+  enableLocationInstructions: { sq: 'Për të gjetur xhamitë afër jush, aktivizoni qasjen në vendndodhje në shfletues ose cilësimet e pajisjes.', en: 'To find mosques near you, please enable location access in your browser or device settings.' },
+  tryAgain: { sq: 'Provo Përsëri', en: 'Try Again' },
+  searchAgain: { sq: 'Kërko Përsëri', en: 'Search Again' },
   
   // Notifications
   notifications: { sq: 'Njoftimet', en: 'Notifications' },

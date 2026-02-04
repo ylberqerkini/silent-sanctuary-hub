@@ -23,10 +23,13 @@ export default function MobileMosques() {
   const { 
     currentPosition, 
     startTracking,
-    isTracking 
+    isTracking,
+    permissionStatus,
+    error: locationError
   } = useGeofencing();
 
   const navigate = useNavigate();
+  const [isRequestingLocation, setIsRequestingLocation] = useState(false);
 
   // Fetch top 5 nearest mosques from OpenStreetMap based on user's location
   const { 
@@ -39,6 +42,9 @@ export default function MobileMosques() {
     currentPosition?.coords.longitude,
     MAX_NEARBY_MOSQUES
   );
+
+  // Determine if we're waiting for location
+  const isWaitingForLocation = !currentPosition && isTracking && !locationError;
 
   // Fetch user favorites
   useEffect(() => {
@@ -60,10 +66,11 @@ export default function MobileMosques() {
 
   // Start tracking if not already
   useEffect(() => {
-    if (!isTracking) {
-      startTracking();
+    if (!isTracking && !isRequestingLocation) {
+      setIsRequestingLocation(true);
+      startTracking().finally(() => setIsRequestingLocation(false));
     }
-  }, [isTracking, startTracking]);
+  }, [isTracking, startTracking, isRequestingLocation]);
 
   // Toggle favorite
   const toggleFavorite = async (mosqueId: string) => {
@@ -144,12 +151,22 @@ export default function MobileMosques() {
       </div>
 
       {/* Location info */}
-      {currentPosition && (
+      {currentPosition ? (
         <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
           <Globe className="h-3 w-3" />
           <span>{t('searchingNearby')} ({nearbyMosques.length} {t('found')})</span>
         </div>
-      )}
+      ) : permissionStatus === 'denied' || locationError ? (
+        <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+          <MapPin className="h-3 w-3" />
+          <span>{t('locationDenied') || 'Location access denied. Please enable location in settings.'}</span>
+        </div>
+      ) : isWaitingForLocation ? (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span>{t('gettingLocation') || 'Getting your location...'}</span>
+        </div>
+      ) : null}
 
       {/* Search */}
       <div className="relative">
@@ -170,7 +187,36 @@ export default function MobileMosques() {
         </TabsList>
 
         <TabsContent value="nearby" className="mt-4 space-y-3">
-          {isLoadingMosques ? (
+          {isWaitingForLocation || isRequestingLocation ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald mb-2" />
+                <p className="text-sm text-muted-foreground">{t('gettingLocation') || 'Getting your location...'}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('pleaseAllowLocation') || 'Please allow location access when prompted'}</p>
+              </CardContent>
+            </Card>
+          ) : permissionStatus === 'denied' || locationError ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                <MapPin className="mb-2 h-8 w-8 text-destructive" />
+                <p className="text-sm font-medium text-foreground mb-1">{t('locationAccessRequired') || 'Location Access Required'}</p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {t('enableLocationInstructions') || 'To find mosques near you, please enable location access in your browser or device settings.'}
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setIsRequestingLocation(true);
+                    startTracking().finally(() => setIsRequestingLocation(false));
+                  }}
+                >
+                  <RefreshCw className="mr-1 h-3 w-3" />
+                  {t('tryAgain') || 'Try Again'}
+                </Button>
+              </CardContent>
+            </Card>
+          ) : isLoadingMosques ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-emerald mb-2" />
@@ -201,8 +247,12 @@ export default function MobileMosques() {
               <CardContent className="flex flex-col items-center justify-center py-8 text-center">
                 <MapPin className="mb-2 h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  {currentPosition ? t('noMosquesFound') : t('enableLocation')}
+                  {t('noMosquesFound') || 'No mosques found nearby'}
                 </p>
+                <Button variant="outline" size="sm" className="mt-3" onClick={refetchMosques}>
+                  <RefreshCw className="mr-1 h-3 w-3" />
+                  {t('searchAgain') || 'Search Again'}
+                </Button>
               </CardContent>
             </Card>
           )}
