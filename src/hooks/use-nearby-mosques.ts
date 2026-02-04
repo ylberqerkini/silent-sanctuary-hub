@@ -51,7 +51,7 @@ function formatDistance(meters: number): string {
 export function useNearbyMosques(
   latitude?: number,
   longitude?: number,
-  radiusKm: number = 50
+  limit: number = 5
 ): UseNearbyMosquesResult {
   const [mosques, setMosques] = useState<NearbyMosque[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,16 +67,16 @@ export function useNearbyMosques(
 
     try {
       // Use Overpass API to fetch mosques from OpenStreetMap
-      // This searches for places tagged as mosques within the radius
-      const radiusMeters = radiusKm * 1000;
+      // Search within a large radius but only return top results by distance
+      const searchRadiusMeters = 50000; // 50km search radius to find enough mosques
       
       const overpassQuery = `
         [out:json][timeout:25];
         (
-          node["amenity"="place_of_worship"]["religion"="muslim"](around:${radiusMeters},${latitude},${longitude});
-          way["amenity"="place_of_worship"]["religion"="muslim"](around:${radiusMeters},${latitude},${longitude});
-          node["building"="mosque"](around:${radiusMeters},${latitude},${longitude});
-          way["building"="mosque"](around:${radiusMeters},${latitude},${longitude});
+          node["amenity"="place_of_worship"]["religion"="muslim"](around:${searchRadiusMeters},${latitude},${longitude});
+          way["amenity"="place_of_worship"]["religion"="muslim"](around:${searchRadiusMeters},${latitude},${longitude});
+          node["building"="mosque"](around:${searchRadiusMeters},${latitude},${longitude});
+          way["building"="mosque"](around:${searchRadiusMeters},${latitude},${longitude});
         );
         out center;
       `;
@@ -122,7 +122,8 @@ export function useNearbyMosques(
           };
         })
         .filter((m: NearbyMosque | null): m is NearbyMosque => m !== null)
-        .sort((a: NearbyMosque, b: NearbyMosque) => a.distance - b.distance);
+        .sort((a: NearbyMosque, b: NearbyMosque) => a.distance - b.distance)
+        .slice(0, limit); // Only return top nearest mosques
 
       setMosques(fetchedMosques);
     } catch (err) {
@@ -131,7 +132,7 @@ export function useNearbyMosques(
     } finally {
       setIsLoading(false);
     }
-  }, [latitude, longitude, radiusKm]);
+  }, [latitude, longitude, limit]);
 
   useEffect(() => {
     fetchMosques();
