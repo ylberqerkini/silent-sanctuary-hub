@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGeofencing, Mosque } from "@/hooks/use-geofencing";
 import { useNearbyMosques, NearbyMosque } from "@/hooks/use-nearby-mosques";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,16 +13,10 @@ import { useLanguage } from "@/hooks/use-language";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const RADIUS_OPTIONS = [
-  { value: "10", label: "10 km" },
-  { value: "25", label: "25 km" },
-  { value: "50", label: "50 km" },
-  { value: "100", label: "100 km" },
-];
+const MAX_NEARBY_MOSQUES = 5;
 
 export default function MobileMosques() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchRadius, setSearchRadius] = useState("50");
   const [favorites, setFavorites] = useState<string[]>([]);
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -35,7 +28,7 @@ export default function MobileMosques() {
 
   const navigate = useNavigate();
 
-  // Fetch mosques from OpenStreetMap based on user's location
+  // Fetch top 5 nearest mosques from OpenStreetMap based on user's location
   const { 
     mosques: nearbyMosques, 
     isLoading: isLoadingMosques, 
@@ -44,7 +37,7 @@ export default function MobileMosques() {
   } = useNearbyMosques(
     currentPosition?.coords.latitude,
     currentPosition?.coords.longitude,
-    parseInt(searchRadius)
+    MAX_NEARBY_MOSQUES
   );
 
   // Fetch user favorites
@@ -158,29 +151,15 @@ export default function MobileMosques() {
         </div>
       )}
 
-      {/* Search and Radius Filter */}
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder={t('searchMosques')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={searchRadius} onValueChange={setSearchRadius}>
-          <SelectTrigger className="w-[100px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {RADIUS_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder={t('searchMosques')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
       </div>
 
       {/* Tabs */}
