@@ -112,6 +112,13 @@ export const translations: Translations = {
   enableLocationInstructions: { sq: 'Për të gjetur xhamitë afër jush, aktivizoni qasjen në vendndodhje në shfletues ose cilësimet e pajisjes.', en: 'To find mosques near you, please enable location access in your browser or device settings.' },
   tryAgain: { sq: 'Provo Përsëri', en: 'Try Again' },
   searchAgain: { sq: 'Kërko Përsëri', en: 'Search Again' },
+  manualLocationSearch: { sq: 'Kërko Vendndodhjen Manualisht', en: 'Search Location Manually' },
+  manualLocationDescription: { sq: 'Shkruaj emrin e qytetit ose adresën për të gjetur xhamitë afër.', en: 'Enter a city name or address to find mosques nearby.' },
+  enterCityOrAddress: { sq: 'Shkruaj qytetin ose adresën...', en: 'Enter city or address...' },
+  geocodingFailed: { sq: 'Kërkimi i vendndodhjes dështoi', en: 'Location search failed' },
+  noLocationResults: { sq: 'Nuk u gjet asnjë vendndodhje', en: 'No locations found' },
+  locationSet: { sq: 'Vendndodhja u përcaktua', en: 'Location set successfully' },
+  orSearchManually: { sq: 'Ose kërko manualisht', en: 'Or search manually' },
   
   // Notifications
   notifications: { sq: 'Njoftimet', en: 'Notifications' },
