@@ -3,7 +3,7 @@ import {
   User,
   Settings,
   Flame,
-  MapPin,
+  Trophy,
   Calendar,
   ChevronRight,
   LogOut,
@@ -57,7 +57,7 @@ export default function MobileProfile() {
 
   const stats = [
     { labelKey: "currentStreak", value: streak.current_streak.toString(), icon: Flame, color: "text-gold" },
-    { labelKey: "longestStreak", value: streak.longest_streak.toString(), icon: MapPin, color: "text-emerald" },
+    { labelKey: "longestStreak", value: streak.longest_streak.toString(), icon: Trophy, color: "text-emerald" },
     { labelKey: "weeklyVisits", value: streak.weekly_visits.toString(), icon: Calendar, color: "text-primary" },
   ];
 
