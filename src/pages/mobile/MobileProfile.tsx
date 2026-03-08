@@ -14,20 +14,6 @@ import {
   Heart,
   LogIn,
 } from "lucide-react";
-  User,
-  Settings,
-  Flame,
-  MapPin,
-  Calendar,
-  ChevronRight,
-  LogOut,
-  Moon,
-  Bell,
-  Shield,
-  HelpCircle,
-  Heart,
-  LogIn,
-} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
