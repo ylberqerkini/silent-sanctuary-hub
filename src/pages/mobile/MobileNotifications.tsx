@@ -8,57 +8,31 @@ import { PushNotificationSetup } from "@/components/mobile/PushNotificationSetup
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { useGeofencing } from "@/hooks/use-geofencing";
-
-const recentNotifications = [
-  {
-    id: 1,
-    title: "Masjid Al-Noor Detected",
-    message: "Your phone was silenced. May your prayers be accepted.",
-    time: "2 hours ago",
-    type: "detection",
-  },
-  {
-    id: 2,
-    title: "Streak Milestone! 🔥",
-    message: "You've reached a 10-day streak! Keep it up!",
-    time: "Yesterday",
-    type: "streak",
-  },
-  {
-    id: 3,
-    title: "Jummah Reminder",
-    message: "Don't forget Jummah prayer at Islamic Center at 1:00 PM",
-    time: "2 days ago",
-    type: "reminder",
-  },
-];
+import { useLanguage } from "@/hooks/use-language";
 
 export default function MobileNotifications() {
   const { notifications: pushNotifications, clearNotifications, sendLocalMosqueAlert } = usePushNotifications();
   const { preferences, togglePreference, loading: preferencesLoading } = useUserPreferences();
   const { isAutoSilentActive, insideMosque, isTracking } = useGeofencing();
-  
-  // Combine mock notifications with real push notifications
-  const allNotifications = [
-    ...pushNotifications.map(n => ({
-      id: parseInt(n.id) || Date.now(),
-      title: n.title,
-      message: n.body,
-      time: getRelativeTime(n.receivedAt),
-      type: n.type,
-    })),
-    ...recentNotifications,
-  ];
+  const { t } = useLanguage();
+
+  const allNotifications = pushNotifications.map(n => ({
+    id: parseInt(n.id) || Date.now(),
+    title: n.title,
+    message: n.body,
+    time: getRelativeTime(n.receivedAt, t),
+    type: n.type,
+  }));
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="font-serif text-2xl font-bold text-foreground">
-          Notifications
+          {t('notifications')}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Manage alerts and silent mode
+          {t('manageAlertsAndSilent')}
         </p>
       </div>
 
@@ -73,7 +47,7 @@ export default function MobileNotifications() {
         onClick={() => sendLocalMosqueAlert('Masjid Al-Noor')}
       >
         <Bell className="mr-2 h-4 w-4" />
-        Test Mosque Detection Alert
+        {t('testMosqueAlert')}
       </Button>
 
       {/* Auto Silent Mode Card */}
@@ -85,9 +59,9 @@ export default function MobileNotifications() {
                 <VolumeX className={`h-6 w-6 ${isAutoSilentActive ? 'text-white' : 'text-emerald'}`} />
               </div>
               <div>
-                <h3 className="font-medium">Auto Silent Mode</h3>
+                <h3 className="font-medium">{t('autoSilentMode')}</h3>
                 <p className="text-xs text-muted-foreground">
-                  Automatically silence when entering a mosque
+                  {t('autoSilentModeDesc')}
                 </p>
               </div>
             </div>
@@ -98,11 +72,10 @@ export default function MobileNotifications() {
             />
           </div>
           
-          {/* Active Status Indicator */}
           {isAutoSilentActive && insideMosque && (
             <div className="mt-3 flex items-center gap-2 rounded-lg bg-emerald p-3 text-sm text-white">
               <MapPin className="h-4 w-4" />
-              <span className="font-medium">Currently at {insideMosque.name} - Silent Mode Active</span>
+              <span className="font-medium">{t('currentlyAtMosque')} {insideMosque.name} - {t('silentModeActive')}</span>
             </div>
           )}
           
@@ -111,8 +84,8 @@ export default function MobileNotifications() {
               <Check className="h-4 w-4" />
               <span>
                 {isTracking 
-                  ? 'Monitoring for nearby mosques...' 
-                  : 'Enable location tracking to detect mosques'
+                  ? t('monitoringMosques')
+                  : t('enableTrackingToDetect')
                 }
               </span>
             </div>
@@ -123,17 +96,15 @@ export default function MobileNotifications() {
       {/* Notification Settings */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Alert Settings</CardTitle>
+          <CardTitle className="text-base">{t('alertSettings')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Bell className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Detection Alerts</p>
-                <p className="text-xs text-muted-foreground">
-                  Get notified when entering a mosque
-                </p>
+                <p className="text-sm font-medium">{t('detectionAlerts')}</p>
+                <p className="text-xs text-muted-foreground">{t('detectionAlertsDesc')}</p>
               </div>
             </div>
             <Switch
@@ -149,10 +120,8 @@ export default function MobileNotifications() {
             <div className="flex items-center gap-3">
               <Clock className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Streak Reminders</p>
-                <p className="text-xs text-muted-foreground">
-                  Daily reminders to maintain your streak
-                </p>
+                <p className="text-sm font-medium">{t('streakReminders')}</p>
+                <p className="text-xs text-muted-foreground">{t('streakRemindersDesc')}</p>
               </div>
             </div>
             <Switch
@@ -168,10 +137,8 @@ export default function MobileNotifications() {
             <div className="flex items-center gap-3">
               <Volume2 className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Prayer Reminders</p>
-                <p className="text-xs text-muted-foreground">
-                  Get notified before prayer times
-                </p>
+                <p className="text-sm font-medium">{t('prayerReminders')}</p>
+                <p className="text-xs text-muted-foreground">{t('prayerRemindersDesc')}</p>
               </div>
             </div>
             <Switch
@@ -187,10 +154,8 @@ export default function MobileNotifications() {
             <div className="flex items-center gap-3">
               <Smartphone className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Vibration</p>
-                <p className="text-xs text-muted-foreground">
-                  Vibrate when silencing phone
-                </p>
+                <p className="text-sm font-medium">{t('vibration')}</p>
+                <p className="text-xs text-muted-foreground">{t('vibrationDesc')}</p>
               </div>
             </div>
             <Switch
@@ -206,7 +171,7 @@ export default function MobileNotifications() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Recent</CardTitle>
+            <CardTitle className="text-base">{t('recentNotifications')}</CardTitle>
             {allNotifications.length > 0 && (
               <Button 
                 variant="ghost" 
@@ -221,14 +186,17 @@ export default function MobileNotifications() {
         </CardHeader>
         <CardContent className="space-y-3">
           {allNotifications.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              No notifications yet
+            <div className="py-8 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+                <Bell className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">{t('noNotifications')}</p>
             </div>
           ) : (
             allNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className="flex items-start gap-3 rounded-lg bg-muted/30 p-3"
+                className="flex items-start gap-3 rounded-xl bg-muted/30 p-3"
               >
                 <div
                   className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full ${
@@ -267,17 +235,16 @@ export default function MobileNotifications() {
   );
 }
 
-// Helper function
-function getRelativeTime(date: Date): string {
+function getRelativeTime(date: Date, t: (key: string) => string): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
   
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins} min ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  if (diffDays === 1) return 'Yesterday';
-  return `${diffDays} days ago`;
+  if (diffMins < 1) return t('justNow');
+  if (diffMins < 60) return `${diffMins} ${t('minAgo')}`;
+  if (diffHours < 24) return `${diffHours} ${diffHours > 1 ? t('hoursAgo') : t('hourAgo')}`;
+  if (diffDays === 1) return t('yesterday');
+  return `${diffDays} ${t('daysAgo')}`;
 }
