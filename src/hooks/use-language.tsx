@@ -42,6 +42,19 @@ export const translations: Translations = {
   dailyReminder: { sq: 'Përkujtimi i Ditës', en: 'Daily Reminder' },
   silenceReminder: { sq: '"Kur të hysh në xhami, heshte telefonin dhe zemrën për Allahun."', en: '"When you enter the masjid, silence your phone and your heart for Allah."' },
   
+  // Ramadan
+  ramadanMode: { sq: 'Ramazani', en: 'Ramadan Mode' },
+  live: { sq: 'LIVE', en: 'LIVE' },
+  day: { sq: 'Dita', en: 'Day' },
+  fasted: { sq: 'agjërime', en: 'fasted' },
+  daysUntilRamadan: { sq: 'ditë deri në Ramazan', en: 'days until Ramadan' },
+  viewRamadanFeatures: { sq: 'Shiko veçoritë e Ramazanit', en: 'View Ramadan features' },
+  iftarIn: { sq: 'Iftari për', en: 'Iftar in' },
+  suhoorEndsIn: { sq: 'Syfyri mbaron për', en: 'Suhoor ends in' },
+  
+  // Zakat
+  zakatCalc: { sq: 'Zekati', en: 'Zakat' },
+  
   // Mosques screen
   findMosquesNearYou: { sq: 'Gjej xhamitë afër teje', en: 'Find mosques near you' },
   searchMosques: { sq: 'Kërko xhamitë...', en: 'Search mosques...' },
@@ -120,10 +133,62 @@ export const translations: Translations = {
   locationSet: { sq: 'Vendndodhja u përcaktua', en: 'Location set successfully' },
   orSearchManually: { sq: 'Ose kërko manualisht', en: 'Or search manually' },
   
-  // Notifications
+  // Notifications page
   notifications: { sq: 'Njoftimet', en: 'Notifications' },
-  noNotifications: { sq: 'Nuk ka njofime', en: 'No notifications' },
+  manageAlertsAndSilent: { sq: 'Menaxho njoftimet dhe modalitetin e qetë', en: 'Manage alerts and silent mode' },
+  testMosqueAlert: { sq: 'Testo Njoftimin e Zbulimit të Xhamisë', en: 'Test Mosque Detection Alert' },
+  autoSilentModeDesc: { sq: 'Heshte automatikisht kur hyni në xhami', en: 'Automatically silence when entering a mosque' },
+  currentlyAtMosque: { sq: 'Aktualisht në', en: 'Currently at' },
+  silentModeActive: { sq: 'Modaliteti i Qetë Aktiv', en: 'Silent Mode Active' },
+  monitoringMosques: { sq: 'Duke monitoruar për xhami afër...', en: 'Monitoring for nearby mosques...' },
+  enableTrackingToDetect: { sq: 'Aktivizo gjurmimin për të zbuluar xhamitë', en: 'Enable location tracking to detect mosques' },
+  alertSettings: { sq: 'Cilësimet e Njoftimeve', en: 'Alert Settings' },
+  detectionAlerts: { sq: 'Njoftimet e Zbulimit', en: 'Detection Alerts' },
+  detectionAlertsDesc: { sq: 'Njoftohu kur hyni në xhami', en: 'Get notified when entering a mosque' },
+  streakReminders: { sq: 'Përkujtimet e Serisë', en: 'Streak Reminders' },
+  streakRemindersDesc: { sq: 'Përkujtime ditore për të mbajtur serinë', en: 'Daily reminders to maintain your streak' },
+  prayerReminders: { sq: 'Përkujtimet e Namazit', en: 'Prayer Reminders' },
+  prayerRemindersDesc: { sq: 'Njoftohu para kohëve të namazit', en: 'Get notified before prayer times' },
+  vibration: { sq: 'Dridhja', en: 'Vibration' },
+  vibrationDesc: { sq: 'Dridhu kur heshtet telefoni', en: 'Vibrate when silencing phone' },
+  recentNotifications: { sq: 'Të Fundit', en: 'Recent' },
+  noNotifications: { sq: 'Nuk ka njofime ende', en: 'No notifications yet' },
   clearAll: { sq: 'Pastro të Gjitha', en: 'Clear All' },
+  justNow: { sq: 'Tani', en: 'Just now' },
+  minAgo: { sq: 'min më parë', en: 'min ago' },
+  hourAgo: { sq: 'orë më parë', en: 'hour ago' },
+  hoursAgo: { sq: 'orë më parë', en: 'hours ago' },
+  yesterday: { sq: 'Dje', en: 'Yesterday' },
+  daysAgo: { sq: 'ditë më parë', en: 'days ago' },
+  
+  // Qibla page
+  qiblaTitle: { sq: 'Gjej Kiblen', en: 'Qibla Finder' },
+  qiblaSubtitle: { sq: 'Gjej drejtimin e Qabesë', en: 'Find the direction of the Kaaba' },
+  qiblaHowToUse: { sq: 'Si të përdoret:', en: 'How to use:' },
+  qiblaInstructions: { sq: 'Mbani telefonin rrafsh dhe paralel me tokën. Shigjeta do të tregojë drejtimin e Qabesë në Mekë.', en: 'Hold your phone flat and parallel to the ground. The arrow will point towards the Kaaba in Mecca.' },
+  qiblaCalibration: { sq: 'Për saktësi më të mirë, kalibroni busolën e telefonit duke e lëvizur në formë të tetës.', en: 'For best accuracy, calibrate your phone\'s compass by moving it in a figure-8 pattern.' },
+  
+  // Donate page
+  supportSilentMasjid: { sq: 'Mbështet Xhaminë e Qetë', en: 'Support Silent Masjid' },
+  donationIsSadaqah: { sq: 'Dhurata juaj është Sadaka Xharije', en: 'Your donation is a Sadaqah Jariyah' },
+  fundingGoal: { sq: 'Qëllimi i Fondeve', en: 'Funding Goal' },
+  funded: { sq: 'financuar', en: 'funded' },
+  generousDonors: { sq: 'dhurues bujarë', en: 'generous donors' },
+  whyDonate: { sq: 'Pse të Dhurosh?', en: 'Why Donate?' },
+  supportFreeApps: { sq: 'Mbështet aplikacione falas islame për Umetin', en: 'Support free Islamic apps for the Ummah' },
+  expandMosqueDb: { sq: 'Ndihmo të zgjerosh bazën e xhamive globalisht', en: 'Help expand mosque database globally' },
+  fundNewFeatures: { sq: 'Fondo veçori dhe përmirësime të reja', en: 'Fund new features and improvements' },
+  contributeSadaqah: { sq: 'Kontribuo në Sadaka Xharije', en: 'Contribute to Sadaqah Jariyah' },
+  oneTime: { sq: 'Njëherësh', en: 'One-time' },
+  monthly: { sq: 'Mujore', en: 'Monthly' },
+  selectAmount: { sq: 'Zgjidh Shumën', en: 'Select Amount' },
+  monthlyDonation: { sq: 'Dhurim mujor', en: 'Monthly donation' },
+  oneTimeDonation: { sq: 'Dhurim njëherësh', en: 'One-time donation' },
+  perYear: { sq: '/vit', en: '/year' },
+  payWithCard: { sq: 'Paguaj me Kartë', en: 'Pay with Card' },
+  paypal: { sq: 'PayPal', en: 'PayPal' },
+  hadithQuote: { sq: '"Kur vdes njeriu, veprat e tij ndërpriten përveç tre gjërave: Sadaka Xharije, dituria që u sjell dobi të tjerëve, dhe fëmija i mirë që lutet për të."', en: '"When a person dies, their deeds end except for three: Sadaqah Jariyah, knowledge that benefits others, and a righteous child who prays for them."' },
+  prophetMuhammad: { sq: '— Profeti Muhamed ﷺ', en: '— Prophet Muhammad ﷺ' },
   
   // Donate
   supportOurMission: { sq: 'Mbështet Misionin Tonë', en: 'Support Our Mission' },
